@@ -1,0 +1,2023 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clovis Graphic Maker</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ── CLOVIS DESIGN TOKENS (from Figma) ── */
+      :root {
+        --bg1: #021f28;
+        --surface1: #052c36;
+        --surface2: #063e4c;
+        --primary: #2fd9ff;
+        --primary-bg: rgba(47, 217, 255, 0.12);
+        --primary-20: rgba(47, 217, 255, 0.2);
+        --border-def: rgba(47, 217, 255, 0.3);
+        --border-lt: rgba(47, 217, 255, 0.16);
+        --text-pri: #f2f7f9;
+        --text-sec: #9ee1f3;
+        --text-dis: #c4d0d6;
+        --text-hl: #8feaff;
+        --grad-label: linear-gradient(
+          175.87deg,
+          #56e6ff 10%,
+          #3deed0 60%,
+          #00c39b 100%
+        );
+        --grad-h2: linear-gradient(
+          163deg,
+          #56e6ff 10%,
+          #3deed0 60%,
+          #00c39b 100%
+        );
+        --font-h: "Host Grotesk", sans-serif;
+        --font-m: "Geist Mono", monospace;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #0a1015;
+        font-family: var(--font-h);
+        color: var(--text-pri);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+
+      /* ── TOOLBAR ── */
+      .tool-bar {
+        background: #0d1820;
+        border-bottom: 1px solid rgba(47, 217, 255, 0.15);
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .tool-logo {
+        font-family: var(--font-m);
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--primary);
+        letter-spacing: 0.15em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+      .tool-sep {
+        width: 1px;
+        height: 26px;
+        background: rgba(255, 255, 255, 0.1);
+        flex-shrink: 0;
+      }
+      .tool-label {
+        font-size: 10px;
+        font-family: var(--font-m);
+        color: var(--text-dis);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+      .tool-select {
+        background: rgba(47, 217, 255, 0.07);
+        border: 1px solid rgba(47, 217, 255, 0.2);
+        border-radius: 8px;
+        color: var(--text-pri);
+        font-family: var(--font-h);
+        font-size: 13px;
+        padding: 5px 10px;
+        outline: none;
+        cursor: pointer;
+      }
+      .tool-select option {
+        background: #0d1820;
+      }
+      .btn {
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-family: var(--font-h);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: all 0.15s;
+        white-space: nowrap;
+      }
+      .btn-bg-sel {
+        padding: 5px 10px;
+        border-radius: 7px;
+        font-family: var(--font-h);
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        border: 1px solid rgba(47, 217, 255, 0.15);
+        background: rgba(47, 217, 255, 0.05);
+        color: var(--text-sec);
+        transition: all 0.15s;
+        white-space: nowrap;
+      }
+      .btn-bg-sel:hover {
+        border-color: rgba(47, 217, 255, 0.35);
+        color: var(--text-pri);
+      }
+      .btn-bg-sel.active {
+        border-color: rgba(47, 217, 255, 0.6);
+        background: rgba(47, 217, 255, 0.12);
+        color: var(--primary);
+      }
+      .btn-primary {
+        background: var(--primary);
+        color: #021f28;
+      }
+      .btn-primary:hover {
+        background: #56e6ff;
+      }
+      .btn-ghost {
+        background: rgba(47, 217, 255, 0.08);
+        border: 1px solid rgba(47, 217, 255, 0.25);
+        color: var(--primary);
+      }
+      .btn-ghost:hover {
+        background: rgba(47, 217, 255, 0.15);
+      }
+
+      /* ── MAIN LAYOUT ── */
+      .main {
+        display: flex;
+        flex: 1;
+      }
+
+      /* ── EDITOR ── */
+      .editor-panel {
+        width: 330px;
+        min-width: 330px;
+        background: #0d1820;
+        border-right: 1px solid rgba(47, 217, 255, 0.12);
+        padding: 18px;
+        overflow-y: auto;
+        max-height: calc(100vh - 53px);
+      }
+      .panel-section {
+        margin-bottom: 22px;
+      }
+      .panel-title {
+        font-family: var(--font-m);
+        font-size: 9px;
+        font-weight: 500;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(47, 217, 255, 0.6);
+        margin-bottom: 10px;
+        padding-bottom: 7px;
+        border-bottom: 1px solid rgba(47, 217, 255, 0.1);
+      }
+      .field-group {
+        margin-bottom: 8px;
+      }
+      .field-label {
+        font-size: 10px;
+        color: var(--text-dis);
+        margin-bottom: 3px;
+        font-family: var(--font-m);
+        letter-spacing: 0.04em;
+      }
+      .field-input {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        color: var(--text-pri);
+        font-family: var(--font-h);
+        font-size: 13px;
+        padding: 6px 9px;
+        outline: none;
+        transition: border-color 0.15s;
+        resize: none;
+      }
+      .field-input:focus {
+        border-color: rgba(47, 217, 255, 0.4);
+      }
+      .field-select {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        color: var(--text-pri);
+        font-family: var(--font-h);
+        font-size: 13px;
+        padding: 6px 9px;
+        outline: none;
+        cursor: pointer;
+      }
+      .field-select option {
+        background: #0d1820;
+      }
+      .row-editor {
+        background: rgba(255, 255, 255, 0.02);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 9px;
+        padding: 10px;
+        margin-bottom: 7px;
+      }
+      .row-editor-hd {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+      .row-num {
+        font-family: var(--font-m);
+        font-size: 10px;
+        color: var(--primary);
+        opacity: 0.7;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+      }
+      .btn-del {
+        background: none;
+        border: none;
+        color: rgba(255, 100, 100, 0.5);
+        cursor: pointer;
+        font-size: 13px;
+        padding: 2px 5px;
+        border-radius: 4px;
+        line-height: 1;
+        transition: color 0.15s;
+      }
+      .btn-del:hover {
+        color: rgba(255, 100, 100, 0.9);
+      }
+      .row-grid2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+      }
+      .btn-add-row {
+        width: 100%;
+        background: rgba(47, 217, 255, 0.05);
+        border: 1px dashed rgba(47, 217, 255, 0.22);
+        border-radius: 8px;
+        color: rgba(47, 217, 255, 0.55);
+        font-family: var(--font-h);
+        font-size: 12px;
+        padding: 7px;
+        cursor: pointer;
+        transition: all 0.15s;
+        margin-top: 4px;
+      }
+      .btn-add-row:hover {
+        background: rgba(47, 217, 255, 0.1);
+        color: var(--primary);
+      }
+
+      /* ── PREVIEW ── */
+      .preview-panel {
+        flex: 1;
+        background: #111a20;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 28px;
+        overflow: auto;
+      }
+      .preview-label {
+        font-family: var(--font-m);
+        font-size: 9px;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.18);
+        margin-bottom: 18px;
+        align-self: flex-start;
+      }
+      .scale-wrap {
+        width: 100%;
+        overflow: hidden;
+      }
+
+      /* ══════════════════════════════════════════
+   CLOVIS SLIDE (the actual exportable frame)
+══════════════════════════════════════════ */
+      #slide-output {
+        width: 1296px;
+        transform-origin: top center;
+        background: var(--bg1);
+        padding: 80px 80px 72px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Background variant: Figma glow */
+      #slide-output.bg-figma {
+        background:
+          radial-gradient(
+            80% 70% at 50% 50%,
+            rgba(0, 105, 138, 0.08) 87.15%,
+            rgba(0, 142, 186, 0.4) 92.93%,
+            rgba(120, 218, 255, 0.43) 96.38%,
+            rgba(151, 251, 223, 0.54) 100%
+          ),
+          #0c0e0e;
+      }
+      #slide-output.bg-figma::before {
+        display: none;
+      }
+      #slide-output.bg-figma .slide-bg-logo {
+        display: block;
+      }
+
+      /* Background variant: blue gradient */
+      #slide-output.bg-grad {
+        background:
+          linear-gradient(180deg, rgba(14, 127, 156, 0) 0%, #0e7f9c 100%),
+          var(--bg1);
+      }
+      #slide-output.bg-grad::before {
+        display: none;
+      }
+
+      /* Default solid */
+      #slide-output.bg-solid::before {
+        content: "";
+        position: absolute;
+        top: -120px;
+        right: -80px;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(
+          ellipse,
+          rgba(47, 217, 255, 0.04) 0%,
+          transparent 70%
+        );
+        pointer-events: none;
+      }
+
+      /* ── Spread Chart Template ─────────────────────────── */
+      .spread-chart {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .spread-axis-row {
+        display: grid;
+        grid-template-columns: 240px 1fr 52px;
+        gap: 0 24px;
+        align-items: center;
+        padding: 0 0 18px 0;
+        border-bottom: 1px solid rgba(47, 217, 255, 0.08);
+        margin-bottom: 4px;
+      }
+      .spread-axis-labels {
+        display: flex;
+        justify-content: space-between;
+        padding: 0 2px;
+      }
+      .spread-axis-lbl {
+        font-family: var(--font-m);
+        font-size: 14px;
+        color: rgba(158, 225, 243, 0.5);
+        letter-spacing: 0.06em;
+      }
+
+      .spread-row {
+        display: grid;
+        grid-template-columns: 240px 1fr 52px;
+        gap: 0 24px;
+        align-items: center;
+        padding: 20px 0;
+        border-bottom: 1px solid rgba(47, 217, 255, 0.06);
+        position: relative;
+      }
+      .spread-row:last-child {
+        border-bottom: none;
+      }
+
+      .spread-label {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .spread-meta-icon-stack {
+        position: relative;
+        width: 54px;
+        height: 54px;
+        flex-shrink: 0;
+      }
+      .spread-token-disc {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle at 28% 28%,
+          #3d86d8 0%,
+          #2c73c8 58%,
+          #1f5fb0 100%
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-size: 42px;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+      }
+      .spread-token-disc img {
+        width: 100%;
+      }
+      .spread-chain-disc {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #052b3a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #f3f7ff;
+        font-size: 16px;
+        border: 3px solid #052b3a;
+      }
+      .spread-chain-discs {
+        position: absolute;
+        right: -4px;
+        bottom: -2px;
+        display: inline-flex;
+        align-items: center;
+      }
+      .spread-chain-disc:nth-child(2) {
+        margin-left: -8px;
+      }
+      .spread-chain-disc img {
+        width: 100%;
+      }
+      .spread-meta-text {
+        min-width: 0;
+      }
+      .spread-asset-name {
+        font-family: var(--font-h);
+        font-size: 24px;
+        font-weight: 700;
+        line-height: 1.05;
+        color: rgba(239, 246, 252, 0.96);
+        letter-spacing: -0.01em;
+      }
+      .spread-chain-name {
+        font-family: var(--font-h);
+        margin-top: 4px;
+        font-size: 17px;
+        color: rgba(165, 177, 185, 0.85);
+      }
+
+      .spread-bar-area {
+        position: relative;
+        min-height: 74px;
+        display: flex;
+        align-items: center;
+      }
+      /* grid lines */
+      .spread-grid-lines {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        justify-content: space-between;
+        pointer-events: none;
+      }
+      .spread-grid-line {
+        width: 1px;
+        height: 100%;
+        background: rgba(47, 217, 255, 0.06);
+      }
+
+      .spread-bars {
+        position: relative;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .spread-bar-line {
+        display: grid;
+        grid-template-columns: 120px 1fr;
+        align-items: center;
+        gap: 8px;
+      }
+      .spread-proto-lbl {
+        font-family: var(--font-m);
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .spread-proto-lbl.low {
+        color: rgba(165, 177, 185, 0.72);
+      }
+      .spread-proto-lbl.high {
+        color: rgba(47, 217, 255, 0.9);
+      }
+      .spread-track {
+        position: relative;
+        height: 12px;
+        border-radius: 6px;
+        background: rgba(47, 217, 255, 0.06);
+        overflow: hidden;
+      }
+      .spread-track-wrap {
+        position: relative;
+        padding-top: 18px;
+      }
+      .spread-fill {
+        height: 100%;
+        border-radius: 6px;
+        min-width: 6px;
+        transition: width 0.3s;
+      }
+      .spread-fill.low {
+        background: rgba(52, 168, 194, 0.82);
+      }
+      .spread-fill.high {
+        background: linear-gradient(90deg, #2fd9ff 0%, #00e5d8 100%);
+      }
+      .spread-rate-top {
+        position: absolute;
+        top: 0;
+        font-family: var(--font-m);
+        font-size: 12px;
+        white-space: nowrap;
+        transform: translateX(-50%);
+      }
+      .spread-rate-top.low {
+        color: rgba(165, 177, 185, 0.8);
+      }
+      .spread-rate-top.high {
+        color: #2fd9ff;
+        font-weight: 600;
+      }
+
+      .spread-diff-col {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+      }
+      .spread-diff-val {
+        font-family: var(--font-m);
+        font-size: 18px;
+        font-weight: 700;
+        color: #2fd9ff;
+        letter-spacing: -0.01em;
+      }
+      .spread-diff-val.high {
+        color: #00e5d8;
+        font-size: 22px;
+      }
+      .spread-diff-lbl {
+        font-family: var(--font-m);
+        font-size: 12px;
+        color: rgba(158, 225, 243, 0.5);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      /* Slide content wrapper */
+      .slide-container {
+        display: flex;
+        flex-direction: column;
+        gap: 48px;
+        align-items: center;
+        width: 100%;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* Figma bg logo watermark */
+      .slide-bg-logo {
+        display: none;
+        position: absolute;
+        top: 28px;
+        right: 40px;
+        width: 72px;
+        height: 72px;
+        opacity: 1;
+        z-index: 10;
+        pointer-events: none;
+      }
+
+      /* Heading */
+      .slide-heading {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        align-items: center;
+        text-align: center;
+        width: 100%;
+      }
+      .slide-eyebrow {
+        font-family: var(--font-h);
+        font-size: 20px;
+        letter-spacing: 3.6px;
+        font-weight: 400;
+        background:
+          linear-gradient(
+            180deg,
+            rgba(255, 255, 255, 0.5) 0%,
+            rgba(255, 255, 255, 0) 100%
+          ),
+          var(--grad-label);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .slide-h2 {
+        font-family: var(--font-h);
+        font-size: 54px;
+        font-weight: 700;
+        line-height: 1.1;
+        letter-spacing: 0.48px;
+        color: var(--text-pri);
+        width: 100%;
+      }
+      .slide-h2 .grad {
+        background: var(--grad-h2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+
+      /* ── COMPARISON TABLE ── */
+      .comp-table {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+      }
+      .comp-row-hd {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        width: 100%;
+      }
+      .col-spacer {
+        width: 360px;
+        min-width: 360px;
+      }
+      .col-them-hd {
+        width: 360px;
+        min-width: 360px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .them-lbl {
+        font-family: var(--font-h);
+        font-size: 20px;
+        color: #9ee1f3;
+        font-weight: 400;
+        line-height: 1.4;
+      }
+      .col-clovis-hd {
+        flex: 1;
+        background: var(--surface1);
+        border-radius: 24px 24px 0 0;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+      }
+      .clovis-logo-txt {
+        font-family: var(--font-m);
+        font-size: 26px;
+        font-weight: 600;
+        color: var(--text-pri);
+        letter-spacing: 0.15em;
+      }
+      .clovis-tags {
+        display: flex;
+        gap: 8px;
+      }
+      .clovis-tag {
+        background: var(--primary-bg);
+        border-radius: 6px;
+        padding: 7px 14px;
+        font-family: var(--font-m);
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--primary);
+      }
+      .comp-row {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        border-bottom: 1px solid var(--border-def);
+        min-height: 96px;
+        width: 100%;
+      }
+      .comp-row:last-child {
+        border-bottom: none;
+      }
+      .col-lbl {
+        width: 360px;
+        min-width: 360px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 24px;
+      }
+      .row-icon-box {
+        background: var(--primary-20);
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+      }
+      .row-title {
+        font-family: var(--font-h);
+        font-size: 21px;
+        font-weight: 700;
+        color: var(--text-pri);
+        line-height: 1.4;
+      }
+      .col-them {
+        width: 360px;
+        min-width: 360px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+      .them-main {
+        font-size: 18px;
+        color: var(--text-sec);
+        line-height: 1.6;
+        letter-spacing: 0.16px;
+      }
+      .them-sub {
+        font-size: 16px;
+        color: #9ee1f3;
+        line-height: 1.5;
+        letter-spacing: 0.14px;
+      }
+      .col-clovis {
+        flex: 1;
+        background: var(--surface1);
+        min-height: 96px;
+        display: flex;
+        align-items: stretch;
+        padding: 0 24px;
+      }
+      .comp-row:last-child .col-clovis {
+        border-radius: 0 0 24px 24px;
+        padding-bottom: 24px;
+      }
+      .clovis-cell {
+        background: var(--surface2);
+        border-left: 1px solid var(--border-lt);
+        border-right: 1px solid var(--border-lt);
+        border-top: 1px solid var(--border-lt);
+        flex: 1;
+        display: flex;
+        align-items: center;
+        padding: 24px;
+        gap: 6px;
+        border-radius: 16px 16px 0 0;
+      }
+      .comp-row:last-child .clovis-cell {
+        border-bottom: 1px solid var(--border-lt);
+        border-radius: 0 0 16px 16px;
+      }
+      .star-ic {
+        color: var(--primary);
+        font-size: 15px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .clovis-txt {
+        font-family: var(--font-h);
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--text-hl);
+        line-height: 1.6;
+        letter-spacing: 0.16px;
+      }
+
+      /* ── RATE TABLE ── */
+      .rate-wrap {
+        width: 100%;
+      }
+      .rate-col-headers {
+        display: grid;
+        grid-template-columns: 160px 200px 1fr 1fr 128px;
+        padding: 0 4px;
+        border-bottom: 1px solid rgba(47, 217, 255, 0.14);
+        margin-bottom: 2px;
+      }
+      .rch {
+        font-family: var(--font-m);
+        font-size: 13px;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(158, 225, 243, 0.8);
+        padding: 10px 8px;
+      }
+      .rch.right {
+        text-align: right;
+      }
+      .rate-row {
+        display: grid;
+        grid-template-columns: 160px 200px 1fr 1fr 128px;
+        align-items: center;
+        border-bottom: 1px solid rgba(47, 217, 255, 0.07);
+        min-height: 76px;
+        padding: 0 4px;
+        border-radius: 5px;
+      }
+      .rate-row:last-child {
+        border-bottom: none;
+      }
+      .rcell {
+        padding: 13px 8px;
+      }
+
+      /* Token pill */
+      .token-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--primary-bg);
+        border: 1px solid rgba(47, 217, 255, 0.18);
+        border-radius: 8px;
+        padding: 5px 11px;
+        font-family: var(--font-m);
+        font-size: 14px;
+        font-weight: 600;
+        color: #4dd9d2;
+        letter-spacing: 0.04em;
+      }
+      .token-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .token-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      /* SVG fallback tokens */
+      .ti-usdt {
+        background: #26a17b;
+      }
+      .ti-usdc {
+        background: #2775ca;
+      }
+
+      /* Chain badge */
+      .chain-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .chain-arrow {
+        font-size: 14px;
+        color: rgba(158, 225, 243, 0.72);
+        margin: 0 -2px;
+      }
+      .chain-flow-part {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .chain-flow-name {
+        font-size: 16px;
+        font-weight: 500;
+        color: #9ee1f3;
+      }
+      .chain-icon {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .chain-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .chain-name {
+        font-size: 16px;
+        font-weight: 500;
+        color: #9ee1f3;
+      }
+
+      /* Rate cell */
+      .rate-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .proto-lbl {
+        font-family: var(--font-m);
+        font-size: 14px;
+        color: rgba(158, 225, 243, 0.85);
+        letter-spacing: 0.05em;
+      }
+      .rate-num {
+        font-family: var(--font-m);
+        font-size: 22px;
+        font-weight: 600;
+        line-height: 1;
+      }
+      .rate-low {
+        color: var(--text-dis);
+      }
+      .rate-high {
+        color: #00e5d8;
+      }
+      .bar-row {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        margin-top: 5px;
+      }
+      .bar-b {
+        height: 2px;
+        border-radius: 2px;
+        background: rgba(61, 112, 119, 0.38);
+      }
+      .bar-s {
+        height: 2px;
+        border-radius: 2px;
+        background: linear-gradient(90deg, #00c8be, #00e5d8);
+      }
+
+      /* Diff badge */
+      .diff-wrap {
+        display: flex;
+        justify-content: flex-end;
+      }
+      .diff-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-family: var(--font-m);
+        font-size: 17px;
+        font-weight: 700;
+        border-radius: 8px;
+        padding: 8px 15px;
+      }
+      .diff-high {
+        color: #00edca;
+        background: rgba(0, 237, 202, 0.1);
+        border: 1px solid rgba(0, 237, 202, 0.26);
+      }
+      .diff-mid {
+        color: #4dd9d2;
+        background: var(--primary-bg);
+        border: 1px solid rgba(47, 217, 255, 0.22);
+      }
+
+      /* Slide footer */
+      .slide-footer {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding-top: 8px;
+      }
+      .slide-source {
+        font-family: var(--font-m);
+        font-size: 14px;
+        color: rgba(158, 225, 243, 0.75);
+        letter-spacing: 0.05em;
+        line-height: 1.7;
+      }
+      .slide-source .hl {
+        color: #8feaff;
+      }
+      .slide-brand {
+        font-family: var(--font-m);
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--primary);
+        opacity: 0.75;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- TOOLBAR -->
+    <div class="tool-bar">
+      <div class="tool-logo">Clovis Maker</div>
+      <div class="tool-sep"></div>
+      <div class="tool-label">Template</div>
+      <select class="tool-select" id="tpl-sel" onchange="switchTpl()">
+        <option value="comparison">Comparison Table</option>
+        <option value="rate" selected>Rate Data Table</option>
+        <option value="spread">Spread Chart</option>
+      </select>
+      <div class="tool-sep"></div>
+      <div class="tool-label">Background</div>
+      <div style="display: flex; gap: 5px; align-items: center">
+        <button
+          class="btn-bg-sel active"
+          id="bg-solid"
+          onclick="setBg('solid')"
+          title="Solid dark"
+        >
+          ⬛ Solid
+        </button>
+        <button
+          class="btn-bg-sel"
+          id="bg-figma"
+          onclick="setBg('figma')"
+          title="Figma style — glow + logo"
+        >
+          ✦ Glow
+        </button>
+        <button
+          class="btn-bg-sel"
+          id="bg-grad"
+          onclick="setBg('grad')"
+          title="Blue gradient"
+        >
+          ▬ Gradient
+        </button>
+      </div>
+      <div class="tool-sep"></div>
+      <div class="tool-label">Scale</div>
+      <select class="tool-select" id="scale-sel" onchange="applyScale()">
+        <option value="0.5">50% (fit screen)</option>
+        <option value="0.6" selected>60%</option>
+        <option value="0.75">75%</option>
+        <option value="1">100% (export)</option>
+      </select>
+      <div style="flex: 1"></div>
+      <button class="btn btn-ghost" onclick="exportPNG()">⬇ Export PNG</button>
+    </div>
+
+    <!-- MAIN -->
+    <div class="main">
+      <!-- EDITOR -->
+      <div class="editor-panel" id="editor-panel"></div>
+
+      <!-- PREVIEW -->
+      <div class="preview-panel">
+        <div class="preview-label">Live Preview — 1296 × auto px</div>
+        <div class="scale-wrap" id="scale-wrap">
+          <div id="slide-output" class="bg-solid"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      /* ════════════════════════════════
+   TOKEN & CHAIN ICON SOURCES
+   Using reliable CDN logos
+════════════════════════════════ */
+      const TOKEN_ICONS = {
+        USDT: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzYiIGhlaWdodD0iMzYiIHZpZXdCb3g9IjAgMCAzNiAzNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTE4IDM2QzI3Ljk0MTEgMzYgMzYgMjcuOTQxMSAzNiAxOEMzNiA4LjA1ODg4IDI3Ljk0MTEgMCAxOCAwQzguMDU4ODggMCAwIDguMDU4ODggMCAxOEMwIDI3Ljk0MTEgOC4wNTg4OCAzNiAxOCAzNloiIGZpbGw9IiMyNkExN0IiLz4KPHBhdGggZD0iTTE5Ljk0OTQgMTkuNzk0MkMxOS44MzM3IDE5Ljc5NDIgMTkuMTY4MSAxOS44NTIxIDE3Ljc1MDEgMTkuODUyMUMxNi41OTI1IDE5Ljg1MjEgMTUuODExMiAxOS44MjMyIDE1LjUyMTggMTkuNzk0MkMxMS4xNTIgMTkuNjIwNiA3Ljg1Mjk1IDE4LjgzOTIgNy44NTI5NSAxNy45NDIxQzcuODUyOTUgMTcuMDE2MSAxMS4xMjMgMTYuMjYzNyAxNS41MjE4IDE2LjA2MTFWMTkuMDQxOEMxNS44MTEyIDE5LjA3MDcgMTYuNjIxNCAxOS4wOTk3IDE3Ljc3OSAxOS4wOTk3QzE5LjEzOTEgMTkuMDk5NyAxOS44MzM3IDE5LjA0MTggMTkuOTQ5NCAxOS4wNDE4VjE2LjA2MTFDMjQuMzQ4MSAxNi4yNjM3IDI3LjYxODIgMTcuMDE2MSAyNy42MTgyIDE3Ljk0MjFDMjcuNjE4MiAxOC44MzkyIDI0LjM0ODEgMTkuNjIwNiAxOS45NDk0IDE5Ljc5NDJaTTE5Ljk0OTQgMTUuNzQyOFYxMy4wODA0SDI2LjA4NDVWOUg5LjQxNTY1VjEzLjA4MDRIMTUuNTUwN1YxNS43NDI4QzEwLjU3MzIgMTUuOTc0MyA2Ljg0MDA5IDE2Ljk1ODIgNi44NDAwOSAxOC4xNDQ3QzYuODQwMDkgMTkuMzMxMiAxMC41NzMyIDIwLjMxNTEgMTUuNTUwNyAyMC41NDY2VjI5LjExMjVIMTkuOTc4NFYyMC41NDY2QzI0Ljk1NTggMjAuMzE1MSAyOC42ODkgMTkuMzMxMiAyOC42ODkgMTguMTQ0N0MyOC42NiAxNi45NTgyIDI0LjkyNjkgMTUuOTc0MyAxOS45NDk0IDE1Ljc0MjhaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4=",
+        USDC: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzYiIGhlaWdodD0iMzYiIHZpZXdCb3g9IjAgMCAzNiAzNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjM2IiBoZWlnaHQ9IjM2IiByeD0iMTgiIGZpbGw9IiMyNzc1Q0EiLz4KPHBhdGggZD0iTTcuNTAwMDYgMTQuMzI0OUM1LjMyNDk0IDIwLjEgOC4zMjUgMjYuNjI1IDE0LjE3NSAyOC43MjQ5QzE0LjQgMjguODc1IDE0LjYyNSAyOS4xNzQ5IDE0LjYyNSAyOS4zOTk5VjMwLjQ1QzE0LjYyNSAzMC41OTk5IDE0LjYyNSAzMC42NzUgMTQuNTQ5OSAzMC43NDk5QzE0LjQ3NTEgMzEuMDQ5OSAxNC4xNzUgMzEuMTk5OSAxMy44NzQ5IDMxLjA0OTlDOS42NzUgMjkuNjk5OSA2LjQ0OTk0IDI2LjQ3NDkgNS4wOTk5NCAyMi4yNzQ5QzIuODQ5OTQgMTUuMTUgNi43NSA3LjU3NDg4IDEzLjg3NDkgNS4zMjQ4OEMxMy45NSA1LjI1IDE0LjA5OTkgNS4yNSAxNC4xNzUgNS4yNUMxNC40NzUxIDUuMzI0ODggMTQuNjI1IDUuNTQ5ODggMTQuNjI1IDUuODQ5OTRWNi44OTk4OEMxNC42MjUgNy4yNzUgMTQuNDc1MSA3LjUgMTQuMTc1IDcuNjQ5OTRDMTEuMTAwMSA4Ljc3NDk0IDguNjI1MDYgMTEuMTc0OSA3LjUwMDA2IDE0LjMyNDlaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMjEuNDUwMSA1LjYyNDk0QzIxLjUyNDkgNS4zMjQ4OCAyMS44MjUgNS4xNzQ5NCAyMi4xMjUxIDUuMzI0ODhDMjYuMjQ5OSA2LjY3NDg4IDI5LjU1MDEgOS44OTk5NCAzMC45MDAxIDE0LjE3NDlDMzMuMTUwMSAyMS4yOTk5IDI5LjI1IDI4Ljg3NSAyMi4xMjUxIDMxLjEyNUMyMi4wNSAzMS4xOTk5IDIxLjkwMDEgMzEuMTk5OSAyMS44MjUgMzEuMTk5OUMyMS41MjQ5IDMxLjEyNSAyMS4zNzUgMzAuOSAyMS4zNzUgMzAuNTk5OVYyOS41NUMyMS4zNzUgMjkuMTc0OSAyMS41MjQ5IDI4Ljk0OTkgMjEuODI1IDI4Ljc5OTlDMjQuODk5OSAyNy42NzQ5IDI3LjM3NDkgMjUuMjc1IDI4LjQ5OTkgMjIuMTI1QzMwLjY3NTEgMTYuMzQ5OSAyNy42NzUgOS44MjQ4OCAyMS44MjUgNy43MjVDMjEuNiA3LjU3NDg4IDIxLjM3NSA3LjI3NSAyMS4zNzUgNi45NzQ5NFY1LjkyNUMyMS4zNzUgNS43NzQ4OCAyMS4zNzUgNS43IDIxLjQ1MDEgNS42MjQ5NFoiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0xOC4yMjUgMTYuOTVDMjEuMzc1IDE3LjMyNDkgMjIuOTUgMTguMjI0OSAyMi45NSAyMC44NDk5QzIyLjk1IDIyLjg3NDkgMjEuNDUwMSAyNC40NDk5IDE5LjIwMDEgMjQuODI1VjI2LjYyNUMxOS4xMjUgMjcgMTguOSAyNy4yMjUgMTguNTk5OSAyNy4yMjVIMTcuNDc0OUMxNy4xIDI3LjE0OTkgMTYuODc1IDI2LjkyNDkgMTYuODc1IDI2LjYyNVYyNC44MjVDMTQuNCAyNC40NDk5IDEzLjE5OTkgMjMuMDk5OSAxMi45MDAxIDIxLjIyNVYyMS4xNUMxMi45MDAxIDIwLjg0OTkgMTMuMTI1MSAyMC42MjQ5IDEzLjQyNDkgMjAuNjI0OUgxNC43MDAxQzE0LjkyNTEgMjAuNjI0OSAxNS4xNTAxIDIwLjc3NSAxNS4yMjQ5IDIxLjA3NDlDMTUuNDQ5OSAyMi4xOTk5IDE2LjEyNDkgMjMuMDI1IDE4LjA3NTEgMjMuMDI1QzE5LjQ5OTkgMjMuMDI1IDIwLjU1MDEgMjIuMjAwMSAyMC41NTAxIDIxQzIwLjU1MDEgMTkuOCAxOS44NzUxIDE5LjM1IDE3Ljc3NSAxOC45NzVDMTQuNjI1IDE4LjU5OTkgMTMuMTI1MSAxNy42MjUgMTMuMTI1MSAxNS4xNUMxMy4xMjUxIDEzLjI3NDkgMTQuNTQ5OSAxMS43NzUgMTYuNzk5OSAxMS40NzQ5VjkuNzUwMDFDMTYuODc1IDkuMzc0ODkgMTcuMSA5LjE0OTg5IDE3LjQwMDEgOS4xNDk4OUgxOC41MjUxQzE4LjkgOS4yMjQ5NSAxOS4xMjUgOS40NDk5NSAxOS4xMjUgOS43NTAwMVYxMS41NUMyMC44NDk5IDExLjY5OTkgMjIuMTk5OSAxMi45NzQ5IDIyLjUgMTQuNjI0OVYxNC43QzIyLjUgMTQuOTk5OSAyMi4yNzUgMTUuMjI0OSAyMS45NzQ5IDE1LjIyNDlIMjAuNzc1MUMyMC41NTAxIDE1LjIyNDkgMjAuMzI1MSAxNS4wNzQ5IDIwLjI1IDE0Ljg0OTlDMTkuODc1MSAxMy43MjQ5IDE5LjEyNSAxMy4yNzQ5IDE3Ljc3NSAxMy4yNzQ5QzE2LjI3NTEgMTMuMjc0OSAxNS41MjUgMTMuOTQ5OCAxNS41MjUgMTQuOTk5OUMxNS41MjUgMTYuMDUgMTUuOTc1IDE2LjY0OTkgMTguMjI1IDE2Ljk1WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+",
+      };
+
+      const CHAIN_ICONS = {
+        eth: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzMzNzhfNjc3NykiPgo8cGF0aCBkPSJNMTYgMzJDMjQuODM2NiAzMiAzMiAyNC44MzY2IDMyIDE2QzMyIDcuMTYzNDQgMjQuODM2NiAwIDE2IDBDNy4xNjM0NCAwIDAgNy4xNjM0NCAwIDE2QzAgMjQuODM2NiA3LjE2MzQ0IDMyIDE2IDMyWiIgZmlsbD0iIzYyN0VFQSIvPgo8cGF0aCBkPSJNMTYuNDk4IDRWMTIuODdMMjMuOTk1IDE2LjIyTDE2LjQ5OCA0WiIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC42MDIiLz4KPHBhdGggZD0iTTE2LjQ5OCA0TDkgMTYuMjJMMTYuNDk4IDEyLjg3VjRaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMTYuNDk4IDIxLjk2ODJWMjcuOTk1MkwyNCAxNy42MTYyTDE2LjQ5OCAyMS45NjgyWiIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC42MDIiLz4KPHBhdGggZD0iTTE2LjQ5OCAyNy45OTUyVjIxLjk2NzJMOSAxNy42MTYyTDE2LjQ5OCAyNy45OTUyWiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTE2LjQ5OCAyMC41NzMxTDIzLjk5NSAxNi4yMjAxTDE2LjQ5OCAxMi44NzIxVjIwLjU3MzFaIiBmaWxsPSJ3aGl0ZSIgZmlsbC1vcGFjaXR5PSIwLjIiLz4KPHBhdGggZD0iTTkgMTYuMjIwMUwxNi40OTggMjAuNTczMVYxMi44NzIxTDkgMTYuMjIwMVoiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuNjAyIi8+CjwvZz4KPGRlZnM+CjxjbGlwUGF0aCBpZD0iY2xpcDBfMzM3OF82Nzc3Ij4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSJ3aGl0ZSIvPgo8L2NsaXBQYXRoPgo8L2RlZnM+Cjwvc3ZnPg==",
+        ethereum:
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzMzNzhfNjc3NykiPgo8cGF0aCBkPSJNMTYgMzJDMjQuODM2NiAzMiAzMiAyNC44MzY2IDMyIDE2QzMyIDcuMTYzNDQgMjQuODM2NiAwIDE2IDBDNy4xNjM0NCAwIDAgNy4xNjM0NCAwIDE2QzAgMjQuODM2NiA3LjE2MzQ0IDMyIDE2IDMyWiIgZmlsbD0iIzYyN0VFQSIvPgo8cGF0aCBkPSJNMTYuNDk4IDRWMTIuODdMMjMuOTk1IDE2LjIyTDE2LjQ5OCA0WiIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC42MDIiLz4KPHBhdGggZD0iTTE2LjQ5OCA0TDkgMTYuMjJMMTYuNDk4IDEyLjg3VjRaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMTYuNDk4IDIxLjk2ODJWMjcuOTk1MkwyNCAxNy42MTYyTDE2LjQ5OCAyMS45NjgyWiIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC42MDIiLz4KPHBhdGggZD0iTTE2LjQ5OCAyNy45OTUyVjIxLjk2NzJMOSAxNy42MTYyTDE2LjQ5OCAyNy45OTUyWiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTE2LjQ5OCAyMC41NzMxTDIzLjk5NSAxNi4yMjAxTDE2LjQ5OCAxMi44NzIxVjIwLjU3MzFaIiBmaWxsPSJ3aGl0ZSIgZmlsbC1vcGFjaXR5PSIwLjIiLz4KPHBhdGggZD0iTTkgMTYuMjIwMUwxNi40OTggMjAuNTczMVYxMi44NzIxTDkgMTYuMjIwMVoiIGZpbGw9IndoaXRlIiBmaWxsLW9wYWNpdHk9IjAuNjAyIi8+CjwvZz4KPGRlZnM+CjxjbGlwUGF0aCBpZD0iY2xpcDBfMzM3OF82Nzc3Ij4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiBmaWxsPSJ3aGl0ZSIvPgo8L2NsaXBQYXRoPgo8L2RlZnM+Cjwvc3ZnPg==",
+        bsc: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzMzNzhfNjc3NCkiPgo8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNiIgZmlsbD0iI0YwQjkwQiIvPgo8cGF0aCBkPSJNOC44NDM1OSAxNi4wNjIyTDguODU1MTMgMjAuMjkzTDEyLjQ1IDIyLjQwODNWMjQuODg1M0w2Ljc1MTI4IDIxLjU0M1YxNC44MjVMOC44NDM1OSAxNi4wNjIyWk04Ljg0MzU5IDExLjgzMTRWMTQuMjk2OEw2Ljc1IDEzLjA1ODNWMTAuNTkzTDguODQzNTkgOS4zNTQ0OUwxMC45NDc0IDEwLjU5M0w4Ljg0MzU5IDExLjgzMTRaTTEzLjk1MTMgMTAuNTkzTDE2LjA0NDkgOS4zNTQ0OUwxOC4xNDg3IDEwLjU5M0wxNi4wNDQ5IDExLjgzMTRMMTMuOTUxMyAxMC41OTNaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMTAuMzU2NCAxOS40MTZWMTYuOTM5MUwxMi40NSAxOC4xNzc2VjIwLjY0M0wxMC4zNTY0IDE5LjQxNlpNMTMuOTUxMyAyMy4yOTU1TDE2LjA0NDkgMjQuNTM0TDE4LjE0ODcgMjMuMjk1NVYyNS43NjA5TDE2LjA0NDkgMjYuOTk5NEwxMy45NTEzIDI1Ljc2MDlWMjMuMjk1NVpNMjEuMTUxMyAxMC41OTNMMjMuMjQ0OSA5LjM1NDQ5TDI1LjM0ODcgMTAuNTkzVjEzLjA1ODNMMjMuMjQ0OSAxNC4yOTY4VjExLjgzMTRMMjEuMTUxMyAxMC41OTNaTTIzLjI0NDkgMjAuMjkzTDIzLjI1NjQgMTYuMDYyMkwyNS4zNSAxNC44MjM3VjIxLjU0MTdMMTkuNjUxMyAyNC44ODRWMjIuNDA3MUwyMy4yNDQ5IDIwLjI5M1oiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yMS43NDM2IDE5LjQxNkwxOS42NSAyMC42NDI5VjE4LjE3NzZMMjEuNzQzNiAxNi45MzkxVjE5LjQxNloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yMS43NDM2IDEyLjcwODNMMjEuNzU1MSAxNS4xODUzTDE4LjE1IDE3LjMwMDZWMjEuNTQxN0wxNi4wNTY0IDIyLjc2ODZMMTMuOTYyOCAyMS41NDE3VjE3LjMwMDZMMTAuMzU3NyAxNS4xODUzVjEyLjcwODNMMTIuNDYwMyAxMS40Njk5TDE2LjA0MzYgMTMuNTk1NUwxOS42NDg3IDExLjQ2OTlMMjEuNzUyNiAxMi43MDgzSDIxLjc0MzZaTTEwLjM1NjQgOC40Nzg4NUwxNi4wNDQ5IDUuMTI1TDIxLjc0MzYgOC40Nzg4NUwxOS42NSA5LjcxNzMxTDE2LjA0NDkgNy41OTE2N0wxMi40NSA5LjcxNzMxTDEwLjM1NjQgOC40Nzg4NVoiIGZpbGw9IndoaXRlIi8+CjwvZz4KPGRlZnM+CjxjbGlwUGF0aCBpZD0iY2xpcDBfMzM3OF82Nzc0Ij4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iMTYiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+",
+        base: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzMzNzhfNjc3MSkiPgo8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNiIgZmlsbD0iI0ZDRkRGRSIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTMyIDE2QzMyIDI0LjgzNjYgMjQuODM2NiAzMiAxNiAzMkM3LjE2MzQ0IDMyIDAgMjQuODM2NiAwIDE2QzAgNy4xNjM0NCA3LjE2MzQ0IDAgMTYgMEMyNC44MzY2IDAgMzIgNy4xNjM0NCAzMiAxNlpNMjcuMTg1OCAxNkMyNy4xODU4IDIyLjE2NiAyMi4xNzc4IDI3LjE2NDQgMTYgMjcuMTY0NEMxMC4xMzQxIDI3LjE2NDQgNS4zMjI4IDIyLjY1NzkgNC44NTE5NiAxNi45MjQ0SDIxLjUyMjFWMTUuMDc1Nkg0Ljg1MTk2QzUuMzIyOCA5LjM0MjA4IDEwLjEzNDEgNC44MzU1NiAxNiA0LjgzNTU2QzIyLjE3NzggNC44MzU1NiAyNy4xODU4IDkuODM0MDUgMjcuMTg1OCAxNloiIGZpbGw9IiMwMDUyRkYiLz4KPC9nPgo8ZGVmcz4KPGNsaXBQYXRoIGlkPSJjbGlwMF8zMzc4XzY3NzEiPgo8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSIxNiIgZmlsbD0id2hpdGUiLz4KPC9jbGlwUGF0aD4KPC9kZWZzPgo8L3N2Zz4=",
+        solana:
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPG1hc2sgaWQ9Im1hc2swXzMzNzhfNjgwMCIgc3R5bGU9Im1hc2stdHlwZTpsdW1pbmFuY2UiIG1hc2tVbml0cz0idXNlclNwYWNlT25Vc2UiIHg9IjAiIHk9IjIiIHdpZHRoPSIzMiIgaGVpZ2h0PSIyOSI+CjxwYXRoIGQ9Ik0zMiAySDBWMzAuNjcxMkgzMlYyWiIgZmlsbD0id2hpdGUiLz4KPC9tYXNrPgo8ZyBtYXNrPSJ1cmwoI21hc2swXzMzNzhfNjgwMCkiPgo8cGF0aCBkPSJNMzEuODM1MiAyNC42MDUxTDI2LjU1MjcgMzAuMjgwNkMyNi40Mzc4IDMwLjQwNCAyNi4yOTg4IDMwLjUwMjIgMjYuMTQ0NSAzMC41Njk0QzI1Ljk5MDEgMzAuNjM2NiAyNS44MjM1IDMwLjY3MTMgMjUuNjU1MiAzMC42NzEySDAuNjEzMjY4QzAuNDkzNzc5IDMwLjY3MTIgMC4zNzY4OTUgMzAuNjM2MiAwLjI3Njk3NCAzMC41NzA1QzAuMTc3MDU1IDMwLjUwNDkgMC4wOTg0NTIzIDMwLjQxMTQgMC4wNTA4MjQ5IDMwLjMwMTdDMC4wMDMxOTc1NyAzMC4xOTE5IC0wLjAxMTM4IDMwLjA3MDYgMC4wMDg4ODM0IDI5Ljk1MjZDMC4wMjkxNDY4IDI5LjgzNDYgMC4wODMzNjg0IDI5LjcyNTIgMC4xNjQ4ODYgMjkuNjM3Nkw1LjQ1MTQzIDIzLjk2MjFDNS41NjU5NiAyMy44MzkxIDUuNzA0NDYgMjMuNzQxIDUuODU4MzYgMjMuNjczOUM2LjAxMjI2IDIzLjYwNjcgNi4xNzgyOCAyMy41NzE5IDYuMzQ2MTYgMjMuNTcxNkgzMS4zODY4QzMxLjUwNjIgMjMuNTcxNiAzMS42MjMxIDIzLjYwNjYgMzEuNzIzIDIzLjY3MjJDMzEuODIzIDIzLjczNzkgMzEuOTAxNSAyMy44MzEzIDMxLjk0OTIgMjMuOTQxMkMzMS45OTY4IDI0LjA1MDkgMzIuMDExNCAyNC4xNzIzIDMxLjk5MTEgMjQuMjkwMkMzMS45NzA5IDI0LjQwODIgMzEuOTE2NyAyNC41MTc2IDMxLjgzNTIgMjQuNjA1MVpNMjYuNTUyNyAxMy4xNzYzQzI2LjQzNzggMTMuMDUzIDI2LjI5ODggMTIuOTU0NyAyNi4xNDQ1IDEyLjg4NzVDMjUuOTkwMSAxMi44MjA0IDI1LjgyMzUgMTIuNzg1NyAyNS42NTUyIDEyLjc4NThIMC42MTMyNjhDMC40OTM3NzkgMTIuNzg1OCAwLjM3Njg5NSAxMi44MjA4IDAuMjc2OTc0IDEyLjg4NjRDMC4xNzcwNTUgMTIuOTUyMSAwLjA5ODQ1MjMgMTMuMDQ1NSAwLjA1MDgyNDkgMTMuMTU1M0MwLjAwMzE5NzU3IDEzLjI2NTEgLTAuMDExMzggMTMuMzg2NCAwLjAwODg4MzQgMTMuNTA0NEMwLjAyOTE0NjggMTMuNjIyNCAwLjA4MzM2ODQgMTMuNzMxOCAwLjE2NDg4NiAxMy44MTkzTDUuNDUxNDMgMTkuNDk0OEM1LjU2NTk2IDE5LjYxNzggNS43MDQ0NiAxOS43MTU5IDUuODU4MzYgMTkuNzgzMUM2LjAxMjI2IDE5Ljg1MDMgNi4xNzgyOCAxOS44ODUgNi4zNDYxNiAxOS44ODU0SDMxLjM4NjhDMzEuNTA2MiAxOS44ODU0IDMxLjYyMzEgMTkuODUwNCAzMS43MjMgMTkuNzg0N0MzMS44MjMgMTkuNzE5MSAzMS45MDE1IDE5LjYyNTYgMzEuOTQ5MiAxOS41MTU4QzMxLjk5NjggMTkuNDA2MSAzMi4wMTE0IDE5LjI4NDcgMzEuOTkxMSAxOS4xNjY4QzMxLjk3MDkgMTkuMDQ4OCAzMS45MTY3IDE4LjkzOTQgMzEuODM1MiAxOC44NTE4TDI2LjU1MjcgMTMuMTc2M1pNMC42MTMyNjggOS4wOTk1MkgyNS42NTUyQzI1LjgyMzUgOS4wOTk2MSAyNS45OTAxIDkuMDY0OTkgMjYuMTQ0NSA4Ljk5NzgxQzI2LjI5ODggOC45MzA2MyAyNi40Mzc4IDguODMyMzQgMjYuNTUyNyA4LjcwOTA1TDMxLjgzNTIgMy4wMzM1MkMzMS45MTY3IDIuOTQ2MDEgMzEuOTcwOSAyLjgzNjU0IDMxLjk5MTEgMi43MTg1N0MzMi4wMTE0IDIuNjAwNiAzMS45OTY4IDIuNDc5MjcgMzEuOTQ5MiAyLjM2OTQ5QzMxLjkwMTUgMi4yNTk3MSAzMS44MjMgMi4xNjYyNiAzMS43MjMgMi4xMDA2MkMzMS42MjMxIDIuMDM0OTggMzEuNTA2MiAyIDMxLjM4NjggMkg2LjM0NjE2QzYuMTc4MjggMi4wMDAyOSA2LjAxMjI2IDIuMDM1MDkgNS44NTgzNiAyLjEwMjI1QzUuNzA0NDYgMi4xNjk0MiA1LjU2NTk2IDIuMjY3NTIgNS40NTE0MyAyLjM5MDQ3TDAuMTY2MjQ5IDguMDY1OTlDMC4wODQ4MDk5IDguMTUzNDMgMC4wMzA2MTIzIDguMjYyNzcgMC4wMTAzMDI4IDguMzgwNjFDLTAuMDEwMDA2NSA4LjQ5ODQ2IDAuMDA0NDU1NDMgOC42MTk2NyAwLjA1MTkxNDkgOC43Mjk0MUMwLjA5OTM3NDUgOC44MzkxMyAwLjE3Nzc2OSA4LjkzMjYgMC4yNzc0ODMgOC45OTgzNEMwLjM3NzE5NyA5LjA2NDA5IDAuNDkzODk2IDkuMDk5MjUgMC42MTMyNjggOS4wOTk1MloiIGZpbGw9InVybCgjcGFpbnQwX2xpbmVhcl8zMzc4XzY4MDApIi8+CjwvZz4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQwX2xpbmVhcl8zMzc4XzY4MDAiIHgxPSIyLjcwMTE4IiB5MT0iMzEuMzU0NSIgeDI9IjI5LjAxNDUiIHkyPSIxLjc0NDc5IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIG9mZnNldD0iMC4wOCIgc3RvcC1jb2xvcj0iIzk5NDVGRiIvPgo8c3RvcCBvZmZzZXQ9IjAuMyIgc3RvcC1jb2xvcj0iIzg3NTJGMyIvPgo8c3RvcCBvZmZzZXQ9IjAuNSIgc3RvcC1jb2xvcj0iIzU0OTdENSIvPgo8c3RvcCBvZmZzZXQ9IjAuNiIgc3RvcC1jb2xvcj0iIzQzQjRDQSIvPgo8c3RvcCBvZmZzZXQ9IjAuNzIiIHN0b3AtY29sb3I9IiMyOEUwQjkiLz4KPHN0b3Agb2Zmc2V0PSIwLjk3IiBzdG9wLWNvbG9yPSIjMTlGQjlCIi8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPC9zdmc+",
+        sol: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPG1hc2sgaWQ9Im1hc2swXzMzNzhfNjgwMCIgc3R5bGU9Im1hc2stdHlwZTpsdW1pbmFuY2UiIG1hc2tVbml0cz0idXNlclNwYWNlT25Vc2UiIHg9IjAiIHk9IjIiIHdpZHRoPSIzMiIgaGVpZ2h0PSIyOSI+CjxwYXRoIGQ9Ik0zMiAySDBWMzAuNjcxMkgzMlYyWiIgZmlsbD0id2hpdGUiLz4KPC9tYXNrPgo8ZyBtYXNrPSJ1cmwoI21hc2swXzMzNzhfNjgwMCkiPgo8cGF0aCBkPSJNMzEuODM1MiAyNC42MDUxTDI2LjU1MjcgMzAuMjgwNkMyNi40Mzc4IDMwLjQwNCAyNi4yOTg4IDMwLjUwMjIgMjYuMTQ0NSAzMC41Njk0QzI1Ljk5MDEgMzAuNjM2NiAyNS44MjM1IDMwLjY3MTMgMjUuNjU1MiAzMC42NzEySDAuNjEzMjY4QzAuNDkzNzc5IDMwLjY3MTIgMC4zNzY4OTUgMzAuNjM2MiAwLjI3Njk3NCAzMC41NzA1QzAuMTc3MDU1IDMwLjUwNDkgMC4wOTg0NTIzIDMwLjQxMTQgMC4wNTA4MjQ5IDMwLjMwMTdDMC4wMDMxOTc1NyAzMC4xOTE5IC0wLjAxMTM4IDMwLjA3MDYgMC4wMDg4ODM0IDI5Ljk1MjZDMC4wMjkxNDY4IDI5LjgzNDYgMC4wODMzNjg0IDI5LjcyNTIgMC4xNjQ4ODYgMjkuNjM3Nkw1LjQ1MTQzIDIzLjk2MjFDNS41NjU5NiAyMy44MzkxIDUuNzA0NDYgMjMuNzQxIDUuODU4MzYgMjMuNjczOUM2LjAxMjI2IDIzLjYwNjcgNi4xNzgyOCAyMy41NzE5IDYuMzQ2MTYgMjMuNTcxNkgzMS4zODY4QzMxLjUwNjIgMjMuNTcxNiAzMS42MjMxIDIzLjYwNjYgMzEuNzIzIDIzLjY3MjJDMzEuODIzIDIzLjczNzkgMzEuOTAxNSAyMy44MzEzIDMxLjk0OTIgMjMuOTQxMkMzMS45OTY4IDI0LjA1MDkgMzIuMDExNCAyNC4xNzIzIDMxLjk5MTEgMjQuMjkwMkMzMS45NzA5IDI0LjQwODIgMzEuOTE2NyAyNC41MTc2IDMxLjgzNTIgMjQuNjA1MVpNMjYuNTUyNyAxMy4xNzYzQzI2LjQzNzggMTMuMDUzIDI2LjI5ODggMTIuOTU0NyAyNi4xNDQ1IDEyLjg4NzVDMjUuOTkwMSAxMi44MjA0IDI1LjgyMzUgMTIuNzg1NyAyNS42NTUyIDEyLjc4NThIMC42MTMyNjhDMC40OTM3NzkgMTIuNzg1OCAwLjM3Njg5NSAxMi44MjA4IDAuMjc2OTc0IDEyLjg4NjRDMC4xNzcwNTUgMTIuOTUyMSAwLjA5ODQ1MjMgMTMuMDQ1NSAwLjA1MDgyNDkgMTMuMTU1M0MwLjAwMzE5NzU3IDEzLjI2NTEgLTAuMDExMzggMTMuMzg2NCAwLjAwODg4MzQgMTMuNTA0NEMwLjAyOTE0NjggMTMuNjIyNCAwLjA4MzM2ODQgMTMuNzMxOCAwLjE2NDg4NiAxMy44MTkzTDUuNDUxNDMgMTkuNDk0OEM1LjU2NTk2IDE5LjYxNzggNS43MDQ0NiAxOS43MTU5IDUuODU4MzYgMTkuNzgzMUM2LjAxMjI2IDE5Ljg1MDMgNi4xNzgyOCAxOS44ODUgNi4zNDYxNiAxOS44ODU0SDMxLjM4NjhDMzEuNTA2MiAxOS44ODU0IDMxLjYyMzEgMTkuODUwNCAzMS43MjMgMTkuNzg0N0MzMS44MjMgMTkuNzE5MSAzMS45MDE1IDE5LjYyNTYgMzEuOTQ5MiAxOS41MTU4QzMxLjk5NjggMTkuNDA2MSAzMi4wMTE0IDE5LjI4NDcgMzEuOTkxMSAxOS4xNjY4QzMxLjk3MDkgMTkuMDQ4OCAzMS45MTY3IDE4LjkzOTQgMzEuODM1MiAxOC44NTE4TDI2LjU1MjcgMTMuMTc2M1pNMC42MTMyNjggOS4wOTk1MkgyNS42NTUyQzI1LjgyMzUgOS4wOTk2MSAyNS45OTAxIDkuMDY0OTkgMjYuMTQ0NSA4Ljk5NzgxQzI2LjI5ODggOC45MzA2MyAyNi40Mzc4IDguODMyMzQgMjYuNTUyNyA4LjcwOTA1TDMxLjgzNTIgMy4wMzM1MkMzMS45MTY3IDIuOTQ2MDEgMzEuOTcwOSAyLjgzNjU0IDMxLjk5MTEgMi43MTg1N0MzMi4wMTE0IDIuNjAwNiAzMS45OTY4IDIuNDc5MjcgMzEuOTQ5MiAyLjM2OTQ5QzMxLjkwMTUgMi4yNTk3MSAzMS44MjMgMi4xNjYyNiAzMS43MjMgMi4xMDA2MkMzMS42MjMxIDIuMDM0OTggMzEuNTA2MiAyIDMxLjM4NjggMkg2LjM0NjE2QzYuMTc4MjggMi4wMDAyOSA2LjAxMjI2IDIuMDM1MDkgNS44NTgzNiAyLjEwMjI1QzUuNzA0NDYgMi4xNjk0MiA1LjU2NTk2IDIuMjY3NTIgNS40NTE0MyAyLjM5MDQ3TDAuMTY2MjQ5IDguMDY1OTlDMC4wODQ4MDk5IDguMTUzNDMgMC4wMzA2MTIzIDguMjYyNzcgMC4wMTAzMDI4IDguMzgwNjFDLTAuMDEwMDA2NSA4LjQ5ODQ2IDAuMDA0NDU1NDMgOC42MTk2NyAwLjA1MTkxNDkgOC43Mjk0MUMwLjA5OTM3NDUgOC44MzkxMyAwLjE3Nzc2OSA4LjkzMjYgMC4yNzc0ODMgOC45OTgzNEMwLjM3NzE5NyA5LjA2NDA5IDAuNDkzODk2IDkuMDk5MjUgMC42MTMyNjggOS4wOTk1MloiIGZpbGw9InVybCgjcGFpbnQwX2xpbmVhcl8zMzc4XzY4MDApIi8+CjwvZz4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQwX2xpbmVhcl8zMzc4XzY4MDAiIHgxPSIyLjcwMTE4IiB5MT0iMzEuMzU0NSIgeDI9IjI5LjAxNDUiIHkyPSIxLjc0NDc5IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIG9mZnNldD0iMC4wOCIgc3RvcC1jb2xvcj0iIzk5NDVGRiIvPgo8c3RvcCBvZmZzZXQ9IjAuMyIgc3RvcC1jb2xvcj0iIzg3NTJGMyIvPgo8c3RvcCBvZmZzZXQ9IjAuNSIgc3RvcC1jb2xvcj0iIzU0OTdENSIvPgo8c3RvcCBvZmZzZXQ9IjAuNiIgc3RvcC1jb2xvcj0iIzQzQjRDQSIvPgo8c3RvcCBvZmZzZXQ9IjAuNzIiIHN0b3AtY29sb3I9IiMyOEUwQjkiLz4KPHN0b3Agb2Zmc2V0PSIwLjk3IiBzdG9wLWNvbG9yPSIjMTlGQjlCIi8+CjwvbGluZWFyR3JhZGllbnQ+CjwvZGVmcz4KPC9zdmc+",
+        arb: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIuNTczMjcgOS43MjYzOFYyMi4yNzM3QzIuNTczMjcgMjMuMDcyMyAyLjk5ODY2IDIzLjgxMTkgMy42OTIzNSAyNC4yMTExTDE0LjU1NTkgMzAuNDgxNUMxNS4yNDk2IDMwLjg4MDggMTYuMTAwNCAzMC44ODA4IDE2Ljc5NDEgMzAuNDgxNUwyNy42NTc3IDI0LjIxMTFDMjguMzUxNCAyMy44MTE5IDI4Ljc3NjcgMjMuMDcyMyAyOC43NzY3IDIyLjI3MzdWOS43MjYzOEMyOC43NzY3IDguOTI3ODUgMjguMzUxNCA4LjE4ODIzIDI3LjY1NzcgNy43ODg5N0wxNi43OTQxIDEuNTE4NTZDMTYuMTAwNCAxLjExOTMgMTUuMjQ5NiAxLjExOTMgMTQuNTU1OSAxLjUxODU2TDMuNjkyMzUgNy43ODg5N0MzLjAwNTIgOC4xODgyMyAyLjU3MzI3IDguOTI3ODUgMi41NzMyNyA5LjcyNjM4WiIgZmlsbD0iIzIxMzE0NyIvPgo8cGF0aCBkPSJNMTguMDUwNiAxOC40MzE2TDE2LjQ5OTYgMjIuNjc5NUMxNi40NTM4IDIyLjc5NzMgMTYuNDUzOCAyMi45MjgyIDE2LjQ5OTYgMjMuMDQ2TDE5LjE2MzEgMzAuMzU3MUwyMi4yNDU1IDI4LjU3NjhMMTguNTQ4IDE4LjQzMTZDMTguNDYyOSAxOC4xOTU5IDE4LjEzNTcgMTguMTk1OSAxOC4wNTA2IDE4LjQzMTZaIiBmaWxsPSIjMTJBQUZGIi8+CjxwYXRoIGQ9Ik0yMS4xNTI2IDExLjI4NDFDMjEuMDY3NSAxMS4wNDg1IDIwLjc0MDMgMTEuMDQ4NSAyMC42NTUyIDExLjI4NDFMMTkuMTA0MiAxNS41MzJDMTkuMDU4NCAxNS42NDk5IDE5LjA1ODQgMTUuNzgwOCAxOS4xMDQyIDE1Ljg5ODZMMjMuNDY5MyAyNy44N0wyNi41NTE3IDI2LjA4OTZMMjEuMTUyNiAxMS4yODQxWiIgZmlsbD0iIzEyQUFGRiIvPgo8cGF0aCBkPSJNMTUuNjc1IDEuOTgzMjNDMTUuNzUzNSAxLjk4MzIzIDE1LjgyNTUgMi4wMDI4NiAxNS44OTc1IDIuMDQyMTRMMjcuNjUxMSA4LjgyOTYyQzI3Ljc4ODUgOC45MDgxNiAyNy44NzM2IDkuMDUyMTYgMjcuODczNiA5LjIwOTI1VjIyLjc4NDJDMjcuODczNiAyMi45NDEzIDI3Ljc4ODUgMjMuMDg1MyAyNy42NTExIDIzLjE2MzhMMTUuODk3NSAyOS45NTc5QzE1LjgzMjEgMjkuOTk3MSAxNS43NTM1IDMwLjAxNjggMTUuNjc1IDMwLjAxNjhDMTUuNTk2NSAzMC4wMTY4IDE1LjUyNDUgMjkuOTk3MSAxNS40NTI1IDI5Ljk1NzlMMy43MDU0NCAyMy4xNzA0QzMuNTY4MDEgMjMuMDkxOCAzLjQ4MjkzIDIyLjk0NzggMy40ODI5MyAyMi43OTA4VjkuMjA5MjVDMy40ODI5MyA5LjA1MjE2IDMuNTY4MDEgOC45MDgxNiAzLjcwNTQ0IDguODI5NjJMMTUuNDU5IDIuMDQyMTRDMTUuNTI0NSAyLjAwMjg2IDE1LjYwMyAxLjk4MzIzIDE1LjY3NSAxLjk4MzIzWk0xNS42NzUgMEMxNS4yNTYyIDAgMTQuODM3MyAwLjExMTI3IDE0LjQ2NDMgMC4zMjcyNjVMMi43MTA3IDcuMTE0NzVDMS45NjQ2NSA3LjU0Njc0IDEuNSA4LjM0NTI3IDEuNSA5LjIwOTI1VjIyLjc4NDJDMS41IDIzLjY0ODIgMS45NjQ2NSAyNC40NTMzIDIuNzEwNyAyNC44ODUzTDE0LjQ2NDMgMzEuNjcyN0MxNC44MzczIDMxLjg4ODcgMTUuMjU2MiAzMiAxNS42NzUgMzJDMTYuMDkzOCAzMiAxNi41MTI3IDMxLjg4ODcgMTYuODg1NyAzMS42NzI3TDI4LjYzOTMgMjQuODg1M0MyOS4zOTE5IDI0LjQ1MzMgMjkuODUgMjMuNjU0NyAyOS44NSAyMi43ODQyVjkuMjA5MjVDMjkuODUgOC4zNDUyNyAyOS4zODU0IDcuNTQwMTkgMjguNjM5MyA3LjEwODJMMTYuODkyMiAwLjMyNzI2NUMxNi41MTI3IDAuMTExMjcgMTYuMDkzOCAwIDE1LjY3NSAwWiIgZmlsbD0iIzlEQ0NFRCIvPgo8cGF0aCBkPSJNNy45MDY5MSAyNy44ODNMOC45ODY3MiAyNC45MjQ2TDExLjE1OTQgMjYuNzMxMUw5LjEzMDY5IDI4LjU4OTlMNy45MDY5MSAyNy44ODNaIiBmaWxsPSIjMjEzMTQ3Ii8+CjxwYXRoIGQ9Ik0xNC42ODY4IDguMjQwNkgxMS43MDkxQzExLjQ4NjYgOC4yNDA2IDExLjI4MzggOC4zNzgwNSAxMS4yMTE4IDguNTg3NUw0LjgyNDUxIDI2LjEwMjdMNy45MDY5MSAyNy44ODNMMTQuOTQyIDguNTk0MDVDMTUuMDAwOSA4LjQyMzg3IDE0Ljg3NjYgOC4yNDA2IDE0LjY4NjggOC4yNDA2WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTE5LjkwMjYgOC4yNDA2SDE2LjkyNDlDMTYuNzAyNCA4LjI0MDYgMTYuNDk5NiA4LjM3ODA1IDE2LjQyNzYgOC41ODc1TDkuMTMwNjkgMjguNTg5OUwxMi4yMTMgMzAuMzcwM0wyMC4xNTEzIDguNjAwNTlDMjAuMjE2NyA4LjQyMzg3IDIwLjA4NTggOC4yNDA2IDE5LjkwMjYgOC4yNDA2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+",
+        arbitrum:
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIuNTczMjcgOS43MjYzOFYyMi4yNzM3QzIuNTczMjcgMjMuMDcyMyAyLjk5ODY2IDIzLjgxMTkgMy42OTIzNSAyNC4yMTExTDE0LjU1NTkgMzAuNDgxNUMxNS4yNDk2IDMwLjg4MDggMTYuMTAwNCAzMC44ODA4IDE2Ljc5NDEgMzAuNDgxNUwyNy42NTc3IDI0LjIxMTFDMjguMzUxNCAyMy44MTE5IDI4Ljc3NjcgMjMuMDcyMyAyOC43NzY3IDIyLjI3MzdWOS43MjYzOEMyOC43NzY3IDguOTI3ODUgMjguMzUxNCA4LjE4ODIzIDI3LjY1NzcgNy43ODg5N0wxNi43OTQxIDEuNTE4NTZDMTYuMTAwNCAxLjExOTMgMTUuMjQ5NiAxLjExOTMgMTQuNTU1OSAxLjUxODU2TDMuNjkyMzUgNy43ODg5N0MzLjAwNTIgOC4xODgyMyAyLjU3MzI3IDguOTI3ODUgMi41NzMyNyA5LjcyNjM4WiIgZmlsbD0iIzIxMzE0NyIvPgo8cGF0aCBkPSJNMTguMDUwNiAxOC40MzE2TDE2LjQ5OTYgMjIuNjc5NUMxNi40NTM4IDIyLjc5NzMgMTYuNDUzOCAyMi45MjgyIDE2LjQ5OTYgMjMuMDQ2TDE5LjE2MzEgMzAuMzU3MUwyMi4yNDU1IDI4LjU3NjhMMTguNTQ4IDE4LjQzMTZDMTguNDYyOSAxOC4xOTU5IDE4LjEzNTcgMTguMTk1OSAxOC4wNTA2IDE4LjQzMTZaIiBmaWxsPSIjMTJBQUZGIi8+CjxwYXRoIGQ9Ik0yMS4xNTI2IDExLjI4NDFDMjEuMDY3NSAxMS4wNDg1IDIwLjc0MDMgMTEuMDQ4NSAyMC42NTUyIDExLjI4NDFMMTkuMTA0MiAxNS41MzJDMTkuMDU4NCAxNS42NDk5IDE5LjA1ODQgMTUuNzgwOCAxOS4xMDQyIDE1Ljg5ODZMMjMuNDY5MyAyNy44N0wyNi41NTE3IDI2LjA4OTZMMjEuMTUyNiAxMS4yODQxWiIgZmlsbD0iIzEyQUFGRiIvPgo8cGF0aCBkPSJNMTUuNjc1IDEuOTgzMjNDMTUuNzUzNSAxLjk4MzIzIDE1LjgyNTUgMi4wMDI4NiAxNS44OTc1IDIuMDQyMTRMMjcuNjUxMSA4LjgyOTYyQzI3Ljc4ODUgOC45MDgxNiAyNy44NzM2IDkuMDUyMTYgMjcuODczNiA5LjIwOTI1VjIyLjc4NDJDMjcuODczNiAyMi45NDEzIDI3Ljc4ODUgMjMuMDg1MyAyNy42NTExIDIzLjE2MzhMMTUuODk3NSAyOS45NTc5QzE1LjgzMjEgMjkuOTk3MSAxNS43NTM1IDMwLjAxNjggMTUuNjc1IDMwLjAxNjhDMTUuNTk2NSAzMC4wMTY4IDE1LjUyNDUgMjkuOTk3MSAxNS40NTI1IDI5Ljk1NzlMMy43MDU0NCAyMy4xNzA0QzMuNTY4MDEgMjMuMDkxOCAzLjQ4MjkzIDIyLjk0NzggMy40ODI5MyAyMi43OTA4VjkuMjA5MjVDMy40ODI5MyA5LjA1MjE2IDMuNTY4MDEgOC45MDgxNiAzLjcwNTQ0IDguODI5NjJMMTUuNDU5IDIuMDQyMTRDMTUuNTI0NSAyLjAwMjg2IDE1LjYwMyAxLjk4MzIzIDE1LjY3NSAxLjk4MzIzWk0xNS42NzUgMEMxNS4yNTYyIDAgMTQuODM3MyAwLjExMTI3IDE0LjQ2NDMgMC4zMjcyNjVMMi43MTA3IDcuMTE0NzVDMS45NjQ2NSA3LjU0Njc0IDEuNSA4LjM0NTI3IDEuNSA5LjIwOTI1VjIyLjc4NDJDMS41IDIzLjY0ODIgMS45NjQ2NSAyNC40NTMzIDIuNzEwNyAyNC44ODUzTDE0LjQ2NDMgMzEuNjcyN0MxNC44MzczIDMxLjg4ODcgMTUuMjU2MiAzMiAxNS42NzUgMzJDMTYuMDkzOCAzMiAxNi41MTI3IDMxLjg4ODcgMTYuODg1NyAzMS42NzI3TDI4LjYzOTMgMjQuODg1M0MyOS4zOTE5IDI0LjQ1MzMgMjkuODUgMjMuNjU0NyAyOS44NSAyMi43ODQyVjkuMjA5MjVDMjkuODUgOC4zNDUyNyAyOS4zODU0IDcuNTQwMTkgMjguNjM5MyA3LjEwODJMMTYuODkyMiAwLjMyNzI2NUMxNi41MTI3IDAuMTExMjcgMTYuMDkzOCAwIDE1LjY3NSAwWiIgZmlsbD0iIzlEQ0NFRCIvPgo8cGF0aCBkPSJNNy45MDY5MSAyNy44ODNMOC45ODY3MiAyNC45MjQ2TDExLjE1OTQgMjYuNzMxMUw5LjEzMDY5IDI4LjU4OTlMNy45MDY5MSAyNy44ODNaIiBmaWxsPSIjMjEzMTQ3Ii8+CjxwYXRoIGQ9Ik0xNC42ODY4IDguMjQwNkgxMS43MDkxQzExLjQ4NjYgOC4yNDA2IDExLjI4MzggOC4zNzgwNSAxMS4yMTE4IDguNTg3NUw0LjgyNDUxIDI2LjEwMjdMNy45MDY5MSAyNy44ODNMMTQuOTQyIDguNTk0MDVDMTUuMDAwOSA4LjQyMzg3IDE0Ljg3NjYgOC4yNDA2IDE0LjY4NjggOC4yNDA2WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTE5LjkwMjYgOC4yNDA2SDE2LjkyNDlDMTYuNzAyNCA4LjI0MDYgMTYuNDk5NiA4LjM3ODA1IDE2LjQyNzYgOC41ODc1TDkuMTMwNjkgMjguNTg5OUwxMi4yMTMgMzAuMzcwM0wyMC4xNTEzIDguNjAwNTlDMjAuMjE2NyA4LjQyMzg3IDIwLjA4NTggOC4yNDA2IDE5LjkwMjYgOC4yNDA2WiIgZmlsbD0id2hpdGUiLz4KPC9zdmc+",
+        op: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzMzNzhfNjc4OCkiPgo8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNiIgZmlsbD0iI0U4NDE0MiIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTguNjUyNCAxOS41OTk0QzkuMjYwNCAyMC4wNDc0IDEwLjA0MTIgMjAuMjcxNCAxMC45OTQ4IDIwLjI3MTRDMTIuMTQ2OCAyMC4yNzE0IDEzLjA2ODQgMjAuMDA5IDEzLjc1MzIgMTkuNDcxNEMxNC40NDQ0IDE4LjkyNzQgMTQuOTI0NCAxOC4xMDE4IDE1LjIwNiAxNy4wMDc0QzE1LjM3ODggMTYuMzM1NCAxNS41MTk2IDE1LjYzNzggMTUuNjQxMiAxNC45Mjc0QzE1LjY3OTYgMTQuNjcxNCAxNS42OTg4IDE0LjQ2MDIgMTUuNjk4OCAxNC4yOTM4QzE1LjY5ODggMTMuNzM3IDE1LjU1OCAxMy4yNTcgMTUuMjc2NCAxMi44NTM4QzE0Ljk5NDggMTIuNDQ0MiAxNC42MTA4IDEyLjEzNyAxNC4xMjQ0IDExLjkzODZDMTMuNjM4IDExLjcyNzQgMTMuMDgxMiAxMS42MjUgMTIuNDY2OCAxMS42MjVDMTAuMjAxMiAxMS42MjUgOC43OTMyIDEyLjcyNTggOC4yNDkyIDE0LjkyNzRDOC4wNTcyIDE1Ljc0MDIgNy45MSAxNi40MzE0IDcuODA3NiAxNy4wMDc0QzcuNzY5MiAxNy4yNjM0IDcuNzUgMTcuNDc0NiA3Ljc1IDE3LjY1MzhDNy43NSAxOC40OTIyIDguMDUwOCAxOS4xNDUgOC42NTI0IDE5LjU5OTRaTTEyLjMwNjggMTguMTQ2NkMxMS45OTMyIDE4LjQwOSAxMS42MTU2IDE4LjU0MzQgMTEuMTY3NiAxOC41NDM0QzEwLjM5OTYgMTguNTQzNCAxMC4wMDkyIDE4LjE3ODYgMTAuMDE1NiAxNy40MzYyQzEwLjAxNTYgMTcuMjU3IDEwLjAzNDggMTcuMDkwNiAxMC4wNjY4IDE2LjkzMDZDMTAuMjE0IDE2LjE0OTggMTAuMzU0OCAxNS40OTcgMTAuNTAyIDE0Ljk1OTRDMTAuNjM2NCAxNC40MDkgMTAuODYwNCAxNC4wMDU4IDExLjE3NCAxMy43NDM0QzExLjQ5NCAxMy40ODEgMTEuODc4IDEzLjM0NjYgMTIuMzI2IDEzLjM0NjZDMTMuMDg3NiAxMy4zNDY2IDEzLjQ2NTIgMTMuNzExNCAxMy40NjUyIDE0LjQ0MUMxMy40NjUyIDE0LjYyMDIgMTMuNDQ2IDE0Ljc5MyAxMy40MTQgMTQuOTU5NEMxMy4zMTggMTUuNTIyNiAxMy4xNzcyIDE2LjE3NTQgMTIuOTkxNiAxNi45MzA2QzEyLjg1NzIgMTcuNDgxIDEyLjYyNjggMTcuODg0MiAxMi4zMDY4IDE4LjE0NjZaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTE2LjA1MDggMjAuMDczQzE2LjEwMiAyMC4xMzA2IDE2LjE2NiAyMC4xNTYyIDE2LjI1NTYgMjAuMTU2MkgxNy44ODc2QzE3Ljk3MDggMjAuMTU2MiAxOC4wNDc2IDIwLjEzMDYgMTguMTE4IDIwLjA3M0MxOC4xOTQ4IDIwLjAxNTQgMTguMjMzMiAxOS45NDUgMTguMjUyNCAxOS44NTU0TDE4LjgwMjggMTcuMjI1SDIwLjQyMkMyMS40NzE2IDE3LjIyNSAyMi4yOTcyIDE3LjAwNzQgMjIuODk4OCAxNi41NjU4QzIzLjUxMzIgMTYuMTI0MiAyMy45MTY0IDE1LjQ0NTggMjQuMTE0OCAxNC41MjQyQzI0LjE1OTYgMTQuMzA2NiAyNC4xODUyIDE0LjA5NTQgMjQuMTg1MiAxMy44OTdDMjQuMTg1MiAxMy4xOTk0IDIzLjkxIDEyLjY2ODIgMjMuMzY2IDEyLjI5N0MyMi44Mjg0IDExLjkzMjIgMjIuMTE4IDExLjc0NjYgMjEuMjI4NCAxMS43NDY2SDE4LjAzNDhDMTcuOTUxNiAxMS43NDY2IDE3Ljg3NDggMTEuNzcyMiAxNy44MDQ0IDExLjgyOThDMTcuNzI3NiAxMS44ODc0IDE3LjY4MjggMTEuOTU3OCAxNy42NyAxMi4wNDc0TDE2LjAxMjQgMTkuODU1NEMxNS45OTk2IDE5LjkzODYgMTYuMDEyNCAyMC4wMDkgMTYuMDUwOCAyMC4wNzNaTTIxLjM4MiAxNS4yOTIyQzIxLjEzMjQgMTUuNDc3OCAyMC44NDQ0IDE1LjU2NzQgMjAuNTA1MiAxNS41Njc0SDE5LjEyOTJMMTkuNTgzNiAxMy40MTdIMjEuMDIzNkMyMS4zNSAxMy40MTcgMjEuNTg2OCAxMy40ODEgMjEuNzIxMiAxMy42MDlDMjEuODU1NiAxMy43MzA2IDIxLjkyNiAxMy45MDk4IDIxLjkyNiAxNC4xNDAyQzIxLjkyNiAxNC4yNDI2IDIxLjkxMzIgMTQuMzY0MiAyMS44ODc2IDE0LjQ5ODZDMjEuODA0NCAxNC44NDQyIDIxLjYzOCAxNS4xMDY2IDIxLjM4MiAxNS4yOTIyWiIgZmlsbD0id2hpdGUiLz4KPC9nPgo8ZGVmcz4KPGNsaXBQYXRoIGlkPSJjbGlwMF8zMzc4XzY3ODgiPgo8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+",
+        optimism:
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzMzNzhfNjc4OCkiPgo8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNiIgZmlsbD0iI0U4NDE0MiIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTguNjUyNCAxOS41OTk0QzkuMjYwNCAyMC4wNDc0IDEwLjA0MTIgMjAuMjcxNCAxMC45OTQ4IDIwLjI3MTRDMTIuMTQ2OCAyMC4yNzE0IDEzLjA2ODQgMjAuMDA5IDEzLjc1MzIgMTkuNDcxNEMxNC40NDQ0IDE4LjkyNzQgMTQuOTI0NCAxOC4xMDE4IDE1LjIwNiAxNy4wMDc0QzE1LjM3ODggMTYuMzM1NCAxNS41MTk2IDE1LjYzNzggMTUuNjQxMiAxNC45Mjc0QzE1LjY3OTYgMTQuNjcxNCAxNS42OTg4IDE0LjQ2MDIgMTUuNjk4OCAxNC4yOTM4QzE1LjY5ODggMTMuNzM3IDE1LjU1OCAxMy4yNTcgMTUuMjc2NCAxMi44NTM4QzE0Ljk5NDggMTIuNDQ0MiAxNC42MTA4IDEyLjEzNyAxNC4xMjQ0IDExLjkzODZDMTMuNjM4IDExLjcyNzQgMTMuMDgxMiAxMS42MjUgMTIuNDY2OCAxMS42MjVDMTAuMjAxMiAxMS42MjUgOC43OTMyIDEyLjcyNTggOC4yNDkyIDE0LjkyNzRDOC4wNTcyIDE1Ljc0MDIgNy45MSAxNi40MzE0IDcuODA3NiAxNy4wMDc0QzcuNzY5MiAxNy4yNjM0IDcuNzUgMTcuNDc0NiA3Ljc1IDE3LjY1MzhDNy43NSAxOC40OTIyIDguMDUwOCAxOS4xNDUgOC42NTI0IDE5LjU5OTRaTTEyLjMwNjggMTguMTQ2NkMxMS45OTMyIDE4LjQwOSAxMS42MTU2IDE4LjU0MzQgMTEuMTY3NiAxOC41NDM0QzEwLjM5OTYgMTguNTQzNCAxMC4wMDkyIDE4LjE3ODYgMTAuMDE1NiAxNy40MzYyQzEwLjAxNTYgMTcuMjU3IDEwLjAzNDggMTcuMDkwNiAxMC4wNjY4IDE2LjkzMDZDMTAuMjE0IDE2LjE0OTggMTAuMzU0OCAxNS40OTcgMTAuNTAyIDE0Ljk1OTRDMTAuNjM2NCAxNC40MDkgMTAuODYwNCAxNC4wMDU4IDExLjE3NCAxMy43NDM0QzExLjQ5NCAxMy40ODEgMTEuODc4IDEzLjM0NjYgMTIuMzI2IDEzLjM0NjZDMTMuMDg3NiAxMy4zNDY2IDEzLjQ2NTIgMTMuNzExNCAxMy40NjUyIDE0LjQ0MUMxMy40NjUyIDE0LjYyMDIgMTMuNDQ2IDE0Ljc5MyAxMy40MTQgMTQuOTU5NEMxMy4zMTggMTUuNTIyNiAxMy4xNzcyIDE2LjE3NTQgMTIuOTkxNiAxNi45MzA2QzEyLjg1NzIgMTcuNDgxIDEyLjYyNjggMTcuODg0MiAxMi4zMDY4IDE4LjE0NjZaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGNsaXAtcnVsZT0iZXZlbm9kZCIgZD0iTTE2LjA1MDggMjAuMDczQzE2LjEwMiAyMC4xMzA2IDE2LjE2NiAyMC4xNTYyIDE2LjI1NTYgMjAuMTU2MkgxNy44ODc2QzE3Ljk3MDggMjAuMTU2MiAxOC4wNDc2IDIwLjEzMDYgMTguMTE4IDIwLjA3M0MxOC4xOTQ4IDIwLjAxNTQgMTguMjMzMiAxOS45NDUgMTguMjUyNCAxOS44NTU0TDE4LjgwMjggMTcuMjI1SDIwLjQyMkMyMS40NzE2IDE3LjIyNSAyMi4yOTcyIDE3LjAwNzQgMjIuODk4OCAxNi41NjU4QzIzLjUxMzIgMTYuMTI0MiAyMy45MTY0IDE1LjQ0NTggMjQuMTE0OCAxNC41MjQyQzI0LjE1OTYgMTQuMzA2NiAyNC4xODUyIDE0LjA5NTQgMjQuMTg1MiAxMy44OTdDMjQuMTg1MiAxMy4xOTk0IDIzLjkxIDEyLjY2ODIgMjMuMzY2IDEyLjI5N0MyMi44Mjg0IDExLjkzMjIgMjIuMTE4IDExLjc0NjYgMjEuMjI4NCAxMS43NDY2SDE4LjAzNDhDMTcuOTUxNiAxMS43NDY2IDE3Ljg3NDggMTEuNzcyMiAxNy44MDQ0IDExLjgyOThDMTcuNzI3NiAxMS44ODc0IDE3LjY4MjggMTEuOTU3OCAxNy42NyAxMi4wNDc0TDE2LjAxMjQgMTkuODU1NEMxNS45OTk2IDE5LjkzODYgMTYuMDEyNCAyMC4wMDkgMTYuMDUwOCAyMC4wNzNaTTIxLjM4MiAxNS4yOTIyQzIxLjEzMjQgMTUuNDc3OCAyMC44NDQ0IDE1LjU2NzQgMjAuNTA1MiAxNS41Njc0SDE5LjEyOTJMMTkuNTgzNiAxMy40MTdIMjEuMDIzNkMyMS4zNSAxMy40MTcgMjEuNTg2OCAxMy40ODEgMjEuNzIxMiAxMy42MDlDMjEuODU1NiAxMy43MzA2IDIxLjkyNiAxMy45MDk4IDIxLjkyNiAxNC4xNDAyQzIxLjkyNiAxNC4yNDI2IDIxLjkxMzIgMTQuMzY0MiAyMS44ODc2IDE0LjQ5ODZDMjEuODA0NCAxNC44NDQyIDIxLjYzOCAxNS4xMDY2IDIxLjM4MiAxNS4yOTIyWiIgZmlsbD0id2hpdGUiLz4KPC9nPgo8ZGVmcz4KPGNsaXBQYXRoIGlkPSJjbGlwMF8zMzc4XzY3ODgiPgo8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+",
+        matic:
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzMzNzhfNjc5MSkiPgo8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSIxNiIgZmlsbD0id2hpdGUiLz4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yMS4xNDM2IDEyLjY1NzlDMjAuNzc4MSAxMi40NDkgMjAuMzA4MSAxMi40NDkgMTkuODkwMyAxMi42NTc5TDE2Ljk2NjEgMTQuMzgxMUwxNC45ODE3IDE1LjQ3NzdMMTIuMTA5NyAxNy4yMDFDMTEuNzQ0MSAxNy40MDk4IDExLjI3NDIgMTcuNDA5OCAxMC44NTY0IDE3LjIwMUw4LjYxMDk3IDE1Ljg0MzNDOC4yNDU0MyAxNS42MzQ0IDcuOTg0MzMgMTUuMjE2NiA3Ljk4NDMzIDE0Ljc0NjdWMTIuMTM1N0M3Ljk4NDMzIDExLjcxNzkgOC4xOTMyMSAxMS4zMDAyIDguNjEwOTcgMTEuMDM5MUwxMC44NTY0IDkuNzMzNkMxMS4yMjE5IDkuNTI0NzMgMTEuNjkxOSA5LjUyNDczIDEyLjEwOTcgOS43MzM2TDE0LjM1NTEgMTEuMDkxM0MxNC43MjA2IDExLjMwMDIgMTQuOTgxNyAxMS43MTc5IDE0Ljk4MTcgMTIuMTg3OVYxMy45MTEyTDE2Ljk2NjEgMTIuNzYyM1YxMC45ODY5QzE2Ljk2NjEgMTAuNTY5MSAxNi43NTcyIDEwLjE1MTQgMTYuMzM5NCA5Ljg5MDI2TDEyLjE2MTkgNy40MzU5NUMxMS43OTYzIDcuMjI3MDggMTEuMzI2NCA3LjIyNzA4IDEwLjkwODYgNy40MzU5NUw2LjYyNjYzIDkuOTQyNDhDNi4yMDg4OCAxMC4xNTE0IDYgMTAuNTY5MSA2IDEwLjk4NjlWMTUuODk1NUM2IDE2LjMxMzIgNi4yMDg4OCAxNi43MzEgNi42MjY2MyAxNi45OTIxTDEwLjg1NjQgMTkuNDQ2NEMxMS4yMjE5IDE5LjY1NTMgMTEuNjkxOSAxOS42NTUzIDEyLjEwOTcgMTkuNDQ2NEwxNC45ODE3IDE3Ljc3NTRMMTYuOTY2MSAxNi42MjY2TDE5LjgzODEgMTQuOTU1NUMyMC4yMDM3IDE0Ljc0NjcgMjAuNjczNiAxNC43NDY3IDIxLjA5MTQgMTQuOTU1NUwyMy4zMzY4IDE2LjI2MUMyMy43MDIzIDE2LjQ2OTkgMjMuOTYzNCAxNi44ODc3IDIzLjk2MzQgMTcuMzU3NlYxOS45Njg2QzIzLjk2MzQgMjAuMzg2MyAyMy43NTQ2IDIwLjgwNDEgMjMuMzM2OCAyMS4wNjUyTDIxLjE0MzYgMjIuMzcwN0MyMC43NzgxIDIyLjU3OTYgMjAuMzA4MSAyMi41Nzk2IDE5Ljg5MDMgMjIuMzcwN0wxNy42NDQ5IDIxLjA2NTJDMTcuMjc5NCAyMC44NTYzIDE3LjAxODMgMjAuNDM4NiAxNy4wMTgzIDE5Ljk2ODZWMTguMjk3NkwxNS4wMzM5IDE5LjQ0NjRWMjEuMTY5NkMxNS4wMzM5IDIxLjU4NzQgMTUuMjQyOCAyMi4wMDUxIDE1LjY2MDYgMjIuMjY2MkwxOS44OTAzIDI0LjcyMDVDMjAuMjU1OSAyNC45Mjk0IDIwLjcyNTggMjQuOTI5NCAyMS4xNDM2IDI0LjcyMDVMMjUuMzczNCAyMi4yNjYyQzI1LjczODkgMjIuMDU3NCAyNiAyMS42Mzk2IDI2IDIxLjE2OTZWMTYuMjA4OEMyNiAxNS43OTEgMjUuNzkxMSAxNS4zNzMzIDI1LjM3MzQgMTUuMTEyMkwyMS4xNDM2IDEyLjY1NzlaIiBmaWxsPSIjODI0N0U1Ii8+CjwvZz4KPGRlZnM+CjxjbGlwUGF0aCBpZD0iY2xpcDBfMzM3OF82NzkxIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iMTYiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+",
+        polygon:
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzMzNzhfNjc5MSkiPgo8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSIxNiIgZmlsbD0id2hpdGUiLz4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yMS4xNDM2IDEyLjY1NzlDMjAuNzc4MSAxMi40NDkgMjAuMzA4MSAxMi40NDkgMTkuODkwMyAxMi42NTc5TDE2Ljk2NjEgMTQuMzgxMUwxNC45ODE3IDE1LjQ3NzdMMTIuMTA5NyAxNy4yMDFDMTEuNzQ0MSAxNy40MDk4IDExLjI3NDIgMTcuNDA5OCAxMC44NTY0IDE3LjIwMUw4LjYxMDk3IDE1Ljg0MzNDOC4yNDU0MyAxNS42MzQ0IDcuOTg0MzMgMTUuMjE2NiA3Ljk4NDMzIDE0Ljc0NjdWMTIuMTM1N0M3Ljk4NDMzIDExLjcxNzkgOC4xOTMyMSAxMS4zMDAyIDguNjEwOTcgMTEuMDM5MUwxMC44NTY0IDkuNzMzNkMxMS4yMjE5IDkuNTI0NzMgMTEuNjkxOSA5LjUyNDczIDEyLjEwOTcgOS43MzM2TDE0LjM1NTEgMTEuMDkxM0MxNC43MjA2IDExLjMwMDIgMTQuOTgxNyAxMS43MTc5IDE0Ljk4MTcgMTIuMTg3OVYxMy45MTEyTDE2Ljk2NjEgMTIuNzYyM1YxMC45ODY5QzE2Ljk2NjEgMTAuNTY5MSAxNi43NTcyIDEwLjE1MTQgMTYuMzM5NCA5Ljg5MDI2TDEyLjE2MTkgNy40MzU5NUMxMS43OTYzIDcuMjI3MDggMTEuMzI2NCA3LjIyNzA4IDEwLjkwODYgNy40MzU5NUw2LjYyNjYzIDkuOTQyNDhDNi4yMDg4OCAxMC4xNTE0IDYgMTAuNTY5MSA2IDEwLjk4NjlWMTUuODk1NUM2IDE2LjMxMzIgNi4yMDg4OCAxNi43MzEgNi42MjY2MyAxNi45OTIxTDEwLjg1NjQgMTkuNDQ2NEMxMS4yMjE5IDE5LjY1NTMgMTEuNjkxOSAxOS42NTUzIDEyLjEwOTcgMTkuNDQ2NEwxNC45ODE3IDE3Ljc3NTRMMTYuOTY2MSAxNi42MjY2TDE5LjgzODEgMTQuOTU1NUMyMC4yMDM3IDE0Ljc0NjcgMjAuNjczNiAxNC43NDY3IDIxLjA5MTQgMTQuOTU1NUwyMy4zMzY4IDE2LjI2MUMyMy43MDIzIDE2LjQ2OTkgMjMuOTYzNCAxNi44ODc3IDIzLjk2MzQgMTcuMzU3NlYxOS45Njg2QzIzLjk2MzQgMjAuMzg2MyAyMy43NTQ2IDIwLjgwNDEgMjMuMzM2OCAyMS4wNjUyTDIxLjE0MzYgMjIuMzcwN0MyMC43NzgxIDIyLjU3OTYgMjAuMzA4MSAyMi41Nzk2IDE5Ljg5MDMgMjIuMzcwN0wxNy42NDQ5IDIxLjA2NTJDMTcuMjc5NCAyMC44NTYzIDE3LjAxODMgMjAuNDM4NiAxNy4wMTgzIDE5Ljk2ODZWMTguMjk3NkwxNS4wMzM5IDE5LjQ0NjRWMjEuMTY5NkMxNS4wMzM5IDIxLjU4NzQgMTUuMjQyOCAyMi4wMDUxIDE1LjY2MDYgMjIuMjY2MkwxOS44OTAzIDI0LjcyMDVDMjAuMjU1OSAyNC45Mjk0IDIwLjcyNTggMjQuOTI5NCAyMS4xNDM2IDI0LjcyMDVMMjUuMzczNCAyMi4yNjYyQzI1LjczODkgMjIuMDU3NCAyNiAyMS42Mzk2IDI2IDIxLjE2OTZWMTYuMjA4OEMyNiAxNS43OTEgMjUuNzkxMSAxNS4zNzMzIDI1LjM3MzQgMTUuMTEyMkwyMS4xNDM2IDEyLjY1NzlaIiBmaWxsPSIjODI0N0U1Ii8+CjwvZz4KPGRlZnM+CjxjbGlwUGF0aCBpZD0iY2xpcDBfMzM3OF82NzkxIj4KPHJlY3Qgd2lkdGg9IjMyIiBoZWlnaHQ9IjMyIiByeD0iMTYiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+",
+        avax: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzMzNzhfNjc2NykiPgo8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNiIgZmlsbD0iI0U4NDE0MiIvPgo8cGF0aCBkPSJNOC4yNzg1OCAyMi43NTQ1SDExLjM4MTdDMTIuMTEyMyAyMi43NTQ1IDEyLjQ3NzYgMjIuNzU0NSAxMi44MDM2IDIyLjY2NDJDMTMuMTYxIDIyLjU1NzkgMTMuNDg3MSAyMi4zNjk1IDEzLjc1ODEgMjIuMTEwMkMxNC4wMDcgMjEuODczMSAxNC4xODY2IDIxLjU1ODcgMTQuNTQwOSAyMC45Mzg3TDE0LjU1MTUgMjAuOTIwMUwxOC41NzYxIDEzLjgwNTdDMTguOTMzNiAxMy4xODEyIDE5LjExMDQgMTIuODY2OSAxOS4xODg5IDEyLjUzN0MxOS4yNzUzIDEyLjE3OTUgMTkuMjc1MyAxMS44MDI0IDE5LjE4ODkgMTEuNDQ1QzE5LjExMSAxMS4xMTc1IDE4LjkzMjQgMTAuODA1NiAxOC41ODAzIDEwLjE5MDNMMTYuOTk3MSA3LjQyNjcxQzE2LjY3MTEgNi44NTMyMiAxNi41MDYxIDYuNTY2NDggMTYuMjk3OSA2LjQ2MDQzQzE2LjA3NCA2LjM0NjUyIDE1LjgwNjkgNi4zNDY1MiAxNS41ODMgNi40NjA0M0MxNS4zNzQ4IDYuNTY2NDggMTUuMjA5OSA2Ljg1MzIyIDE0Ljg4MzkgNy40MjY3MUw3LjIyMTk2IDIwLjkzMTlDNi44OTk4NyAyMS40OTc1IDYuNzM4ODEgMjEuNzgwNCA2Ljc1MDYgMjIuMDEyQzYuNzY2MzIgMjIuMjYzNSA2Ljg5NTkzIDIyLjQ5MTMgNy4xMDgwNSAyMi42Mjg4QzcuMzA0NDQgMjIuNzU0NSA3LjYyNjUzIDIyLjc1NDUgOC4yNzg1OCAyMi43NTQ1WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTIzLjY2NDMgMjIuNzU0NUgxOS4yMThDMTguNTYyIDIyLjc1NDUgMTguMjMyMSAyMi43NTQ1IDE4LjAzOTYgMjIuNjI4OEMxNy44Mjc1IDIyLjQ5MTMgMTcuNjk3OSAyMi4yNTk3IDE3LjY4MjEgMjIuMDA4MkMxNy42NzA0IDIxLjc3ODMgMTcuODMyOCAyMS40OTgxIDE4LjE1NzYgMjAuOTM3NEwxOC4xNTc3IDIwLjkzNzJMMTguMTY1MyAyMC45MjQxTDIwLjM4NDYgMTcuMTE0QzIwLjcxMDYgMTYuNTUyMyAyMC44NzU2IDE2LjI3MzQgMjEuMDc5OCAxNi4xNjc0QzIxLjMwMzYgMTYuMDUzNCAyMS41NjcgMTYuMDUzNCAyMS43OTA4IDE2LjE2NzRDMjEuOTkzNiAxNi4yNzA2IDIyLjE1MTUgMTYuNTM3NyAyMi40NjQxIDE3LjA2NjRMMjIuNDg5OSAxNy4xMTAxTDI0LjcxNzIgMjAuOTIwMkMyNC43MjggMjAuOTM5IDI0LjczODcgMjAuOTU3NCAyNC43NDkzIDIwLjk3NTVDMjUuMDU4IDIxLjUwODMgMjUuMjE1NiAyMS43ODAyIDI1LjIwNDMgMjIuMDA0NEMyNS4xOTI0IDIyLjI1NTYgMjUuMDU4OSAyMi40ODc1IDI0Ljg0NjggMjIuNjI1QzI0LjY1MDMgMjIuNzU0NSAyNC4zMjAzIDIyLjc1NDUgMjMuNjY0MyAyMi43NTQ1WiIgZmlsbD0id2hpdGUiLz4KPC9nPgo8ZGVmcz4KPGNsaXBQYXRoIGlkPSJjbGlwMF8zMzc4XzY3NjciPgo8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+",
+        avalanche:
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzMzNzhfNjc2NykiPgo8Y2lyY2xlIGN4PSIxNiIgY3k9IjE2IiByPSIxNiIgZmlsbD0iI0U4NDE0MiIvPgo8cGF0aCBkPSJNOC4yNzg1OCAyMi43NTQ1SDExLjM4MTdDMTIuMTEyMyAyMi43NTQ1IDEyLjQ3NzYgMjIuNzU0NSAxMi44MDM2IDIyLjY2NDJDMTMuMTYxIDIyLjU1NzkgMTMuNDg3MSAyMi4zNjk1IDEzLjc1ODEgMjIuMTEwMkMxNC4wMDcgMjEuODczMSAxNC4xODY2IDIxLjU1ODcgMTQuNTQwOSAyMC45Mzg3TDE0LjU1MTUgMjAuOTIwMUwxOC41NzYxIDEzLjgwNTdDMTguOTMzNiAxMy4xODEyIDE5LjExMDQgMTIuODY2OSAxOS4xODg5IDEyLjUzN0MxOS4yNzUzIDEyLjE3OTUgMTkuMjc1MyAxMS44MDI0IDE5LjE4ODkgMTEuNDQ1QzE5LjExMSAxMS4xMTc1IDE4LjkzMjQgMTAuODA1NiAxOC41ODAzIDEwLjE5MDNMMTYuOTk3MSA3LjQyNjcxQzE2LjY3MTEgNi44NTMyMiAxNi41MDYxIDYuNTY2NDggMTYuMjk3OSA2LjQ2MDQzQzE2LjA3NCA2LjM0NjUyIDE1LjgwNjkgNi4zNDY1MiAxNS41ODMgNi40NjA0M0MxNS4zNzQ4IDYuNTY2NDggMTUuMjA5OSA2Ljg1MzIyIDE0Ljg4MzkgNy40MjY3MUw3LjIyMTk2IDIwLjkzMTlDNi44OTk4NyAyMS40OTc1IDYuNzM4ODEgMjEuNzgwNCA2Ljc1MDYgMjIuMDEyQzYuNzY2MzIgMjIuMjYzNSA2Ljg5NTkzIDIyLjQ5MTMgNy4xMDgwNSAyMi42Mjg4QzcuMzA0NDQgMjIuNzU0NSA3LjYyNjUzIDIyLjc1NDUgOC4yNzg1OCAyMi43NTQ1WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTIzLjY2NDMgMjIuNzU0NUgxOS4yMThDMTguNTYyIDIyLjc1NDUgMTguMjMyMSAyMi43NTQ1IDE4LjAzOTYgMjIuNjI4OEMxNy44Mjc1IDIyLjQ5MTMgMTcuNjk3OSAyMi4yNTk3IDE3LjY4MjEgMjIuMDA4MkMxNy42NzA0IDIxLjc3ODMgMTcuODMyOCAyMS40OTgxIDE4LjE1NzYgMjAuOTM3NEwxOC4xNTc3IDIwLjkzNzJMMTguMTY1MyAyMC45MjQxTDIwLjM4NDYgMTcuMTE0QzIwLjcxMDYgMTYuNTUyMyAyMC44NzU2IDE2LjI3MzQgMjEuMDc5OCAxNi4xNjc0QzIxLjMwMzYgMTYuMDUzNCAyMS41NjcgMTYuMDUzNCAyMS43OTA4IDE2LjE2NzRDMjEuOTkzNiAxNi4yNzA2IDIyLjE1MTUgMTYuNTM3NyAyMi40NjQxIDE3LjA2NjRMMjIuNDg5OSAxNy4xMTAxTDI0LjcxNzIgMjAuOTIwMkMyNC43MjggMjAuOTM5IDI0LjczODcgMjAuOTU3NCAyNC43NDkzIDIwLjk3NTVDMjUuMDU4IDIxLjUwODMgMjUuMjE1NiAyMS43ODAyIDI1LjIwNDMgMjIuMDA0NEMyNS4xOTI0IDIyLjI1NTYgMjUuMDU4OSAyMi40ODc1IDI0Ljg0NjggMjIuNjI1QzI0LjY1MDMgMjIuNzU0NSAyNC4zMjAzIDIyLjc1NDUgMjMuNjY0MyAyMi43NTQ1WiIgZmlsbD0id2hpdGUiLz4KPC9nPgo8ZGVmcz4KPGNsaXBQYXRoIGlkPSJjbGlwMF8zMzc4XzY3NjciPgo8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+",
+        sei: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzMzNzhfNjc5NCkiPgo8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSIxNiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNS45MTk3IDMxLjk1OTZDMjAuNjA3MiAzMS45NTk2IDI0LjgyNCAyOS45NDc1IDI3Ljc1MDkgMjYuNzQxTDI2Ljk3MjEgMjUuODgyOEMyNi4wMDgzIDI0LjgyMDcgMjQuMzY1MiAyNC43MyAyMy4yODk0IDI1LjY3OTRMMjEuNjI4IDI3LjE0NTVDMTkuMzY3OSAyOS4xNDAxIDE1LjkzMjYgMjkuMDE0MiAxMy44MjU1IDI2Ljg1OThMMTIuNzg2NyAyNS43OTc2QzExLjc4OTIgMjQuNzc3NiAxMC4xNTQ2IDI0Ljc0MjIgOS4xMTMzIDI1LjcxNzhMNi4wNjYyNSAyOC41NzI2QzguNzgyNyAzMC42OTQ3IDEyLjIwMzMgMzEuOTU5NiAxNS45MTk3IDMxLjk1OTZaTTI5LjIyMzYgMjMuODU3TDI5LjYwMTggMjQuMjczOUMzMS4wNzUgMjEuODU2IDMxLjkyMzYgMTkuMDE2OSAzMS45MjM2IDE1Ljk3OThDMzEuOTIzNiAxMi4yOTcyIDMwLjY3NiA4LjkwNTQ4IDI4LjU3OTcgNi4yMDMxNEMyOC4xOTAxIDYuMzAyODcgMjcuODE3NyA2LjQ5Mzc1IDI3LjQ5NiA2Ljc3NzU5TDI1LjgzNDggOC4yNDM2N0MyMy41NzQ2IDEwLjIzODIgMjAuMTM5MyAxMC4xMTI1IDE4LjAzMjMgNy45NTgxTDE2Ljk5MzUgNi44OTU5QzE1Ljk5NTkgNS44NzU5MSAxNC4zNjE0IDUuODQwMzYgMTMuMzIgNi44MTZMOS4wNDU1NyAxMC44MjA4TDYuOTY2MSA4LjYyMDMzTDExLjI0MDUgNC42MTU1M0MxMy40ODc2IDIuNTEwMTkgMTcuMDE0OSAyLjU4NjkyIDE5LjE2NzQgNC43ODc5N0wyMC4yMDYyIDUuODUwMTZDMjEuMTgyOCA2Ljg0ODU1IDIyLjc3NDYgNi45MDY4MSAyMy44MjIxIDUuOTgyNDlMMjUuNDgzMyA0LjUxNjQxQzI1Ljc2MjIgNC4yNzAzNyAyNi4wNTg2IDQuMDU2NzEgMjYuMzY4MSAzLjg3NTE1QzIzLjU2NDQgMS40NjAyNiAxOS45MTI4IDAgMTUuOTE5NyAwQzcuODkxMjEgMCAxLjI0MzQ5IDUuOTAyOTQgMC4wOTIyNDExIDEzLjU5OTNDMi4yODMwMiAxMi4zNDAxIDUuMTI3NiAxMi42NjkzIDYuOTY3NzEgMTQuNTUwOEw4LjE2OTA4IDE1Ljc3OTJDOS4xMDI4NyAxNi43MzQxIDEwLjYwOTIgMTYuODM0NyAxMS42NjI4IDE2LjAxMjhMMTUuMjI0MSAxMy4yMzQ3QzE3LjM2MTcgMTEuNTY3MyAyMC4zODc3IDExLjY0OCAyMi40MzI2IDEzLjQyNjlMMjcuMjgxOCAxNy42NDU1TDI1LjI4NTQgMTkuOTIwOEwyMC40MzYgMTUuNzAyMkMxOS40ODg0IDE0Ljg3NzggMTguMDg2MSAxNC44NDA0IDE3LjA5NTYgMTUuNjEzM0wxMy41MzQyIDE4LjM5MTNDMTEuMjYwNiAyMC4xNjQ5IDguMDEwMTEgMTkuOTQ3NSA1Ljk5NTA4IDE3Ljg4NzJMNC43OTM3MiAxNi42NTg4QzMuNzk2MTcgMTUuNjM4OCAyLjE2MTYxIDE1LjYwMzIgMS4xMjAyNyAxNi41Nzg5TDAgMTcuNjI4NEMwLjM0NjQ1NyAyMS4wMDM3IDEuNzQ0OTkgMjQuMDY3NyAzLjg2Mjc3IDI2LjQ4ODNMNy4wMzM4MyAyMy41MTczQzkuMjgwOTQgMjEuNDEyIDEyLjgwODEgMjEuNDg4NiAxNC45NjA3IDIzLjY4OThMMTUuOTk5NiAyNC43NTE5QzE2Ljk3NiAyNS43NTAyIDE4LjU2OCAyNS44MDg2IDE5LjYxNTMgMjQuODg0M0wyMS4yNzY3IDIzLjQxODJDMjMuNTk4MiAyMS4zNjk0IDI3LjE0MzkgMjEuNTY1MyAyOS4yMjM2IDIzLjg1N1oiIGZpbGw9InVybCgjcGFpbnQwX2xpbmVhcl8zMzc4XzY3OTQpIi8+CjwvZz4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQwX2xpbmVhcl8zMzc4XzY3OTQiIHgxPSIxNS45NjE4IiB5MT0iMi4zODAyMmUtMDciIHgyPSIyMi4yNTEiIHkyPSIzMS45NTciIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzc4MDAwMCIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNDMTEyMUYiLz4KPC9saW5lYXJHcmFkaWVudD4KPGNsaXBQYXRoIGlkPSJjbGlwMF8zMzc4XzY3OTQiPgo8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSIxNiIgZmlsbD0id2hpdGUiLz4KPC9jbGlwUGF0aD4KPC9kZWZzPgo8L3N2Zz4=",
+        inj: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzMzNzhfNjc5NikiPgo8ZyBjbGlwLXBhdGg9InVybCgjY2xpcDFfMzM3OF82Nzk2KSI+CjxwYXRoIGQ9Ik0zLjg4MDggNS41MjgxMkM0LjA4MDggNS4yODAxMiA0LjI4ODggNS4wNDAxMiA0LjQ5NjggNC44MDAxMkM0LjUwNDggNC43OTIxMiA0LjUyODggNC43ODQxMiA0LjUzNjggNC43NzYxMkM0LjU1MjggNC43NTIxMiA0LjU4NDggNC43MzYxMiA0LjYwODggNC43MTIxMkw0LjYyNDggNC42ODgxMkM0Ljc2ODggNC41NTIxMiA0LjkyODggNC40MDgxMiA1LjEwNDggNC4yNzIxMkM1Ljc0NDggMy43OTIxMiA2LjQwMDggMy40MjQxMiA3LjA5NjggMy4xNzYxMkM5LjMzNjggMi4zOTIxMiAxMS44MjQ4IDIuODcyMTIgMTMuNzc2OCA0LjcyMDEyQzE2LjUwNDggNy4yNzIxMiAxNi4yNTY4IDExLjM5MjEgMTQuMDgwOCAxNC4xMjgxQzExLjMyODggMTguMjA4MSA2LjYwODgxIDIzLjg5NjEgMTMuMTQ0OCAyOC45OTIxQzE0LjMyMDggMjkuOTEyMSAxNS4xOTI4IDMwLjY2NDEgMTguODk2OCAzMS43MzYxQzE2LjQ3MjggMzIuMTg0MSAxNC4yMjQ4IDMyLjA0MDEgMTEuNzI4OCAzMS40MDgxQzkuOTYwODEgMzAuNDA4MSA3LjE3NjggMjguMjcyMSA2LjIzMjggMjUuMzg0MUM0LjgwMDggMjEuMDA4MSA4Ljc1MjggMTQuNDU2MSAxMC42NTY4IDExLjkzNjFDMTMuMjcyOCA4LjQ0ODEyIDkuMDQwOCA0LjY3MjEyIDUuOTEyOCA4Ljg4ODEyQzQuMjk2OCAxMS4wODgxIDEuNDQwOCAxNy4zMDQxIDIuNDMyOCAyMS45MjAxQzMuMDA4OCAyNC41MzYxIDMuNzg0OCAyNi40NDAxIDYuODQ4OCAyOS4wNjQxQzYuMjgwOCAyOC43MjgxIDUuNzI4OCAyOC4zNTIxIDUuMTkyOCAyNy45MjAxQy0xLjkxOTIgMjEuMjg4MSAtMS4wOTUyIDExLjAzMjEgMy44ODA4IDUuNTI4MTJaIiBmaWxsPSJ1cmwoI3BhaW50MF9saW5lYXJfMzM3OF82Nzk2KSIvPgo8cGF0aCBkPSJNMjguMTE5NSAyNi40NzIzQzI3LjkxOTUgMjYuNzIwMyAyNy43MTE1IDI2Ljk2MDMgMjcuNTAzNSAyNy4yMDAzQzI3LjQ5NTUgMjcuMjA4MyAyNy40NzE1IDI3LjIxNjMgMjcuNDYzNSAyNy4yMjQzQzI3LjQ0NzUgMjcuMjQ4MyAyNy40MTU1IDI3LjI2NDMgMjcuMzkxNSAyNy4yODgzTDI3LjM3NTUgMjcuMzEyM0MyNy4yMzE1IDI3LjQ0ODMgMjcuMDcxNSAyNy41OTIzIDI2Ljg5NTUgMjcuNzIwM0MyNi4yNTU1IDI4LjIwMDMgMjUuNTk5NSAyOC41NjgzIDI0LjkwMzUgMjguODE2M0MyMi42NjM1IDI5LjYwMDMgMjAuMTc1NSAyOS4xMjAzIDE4LjIyMzUgMjcuMjcyM0MxNS40OTU1IDI0LjcyMDMgMTUuNzQzNSAyMC42MDAzIDE3LjkxOTUgMTcuODY0M0MyMC42NzE1IDEzLjc4NDMgMjUuMzkxNSA4LjA5NjMgMTguODU1NSAzLjAwMDNDMTcuNjc5NSAyLjA4MDMgMTYuODA3NSAxLjMyODMgMTMuMTAzNSAwLjI1NjI5OUMxNS41Mjc1IC0wLjE5MTcwMSAxNy43NzU1IC0wLjA0NzcwMDkgMjAuMjcxNSAwLjU4NDI5OUMyMi4wMzk1IDEuNTg0MyAyNC44MjM1IDMuNzIwMyAyNS43Njc1IDYuNjA4M0MyNy4xOTk1IDEwLjk4NDMgMjMuMjQ3NSAxNy41MzYzIDIxLjM0MzUgMjAuMDU2M0MxOC43Mjc1IDIzLjU0NDMgMjIuOTU5NSAyNy4zMjAzIDI2LjA4NzUgMjMuMTA0M0MyNy43MTk1IDIwLjkwNDMgMzAuNTc1NSAxNC42ODgzIDI5LjU4MzUgMTAuMDcyM0MyOS4wMDc1IDcuNDU2MyAyOC4yMzE1IDUuNTUyMyAyNS4xNjc1IDIuOTI4M0MyNS43MzU1IDMuMjY0MyAyNi4yODc1IDMuNjQwMyAyNi44MjM1IDQuMDcyM0MzMy45MTk1IDEwLjcxMjMgMzMuMDk1NSAyMC45NjgzIDI4LjExOTUgMjYuNDcyM1oiIGZpbGw9InVybCgjcGFpbnQxX2xpbmVhcl8zMzc4XzY3OTYpIi8+CjwvZz4KPC9nPgo8ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDBfbGluZWFyXzMzNzhfNjc5NiIgeDE9IjAuMDAwODAzOTg5IiB5MT0iMTcuNDExMSIgeDI9IjMyLjAwMDgiIHkyPSIxNy40MTExIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiMwMDgyRkEiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMDBGMkZFIi8+CjwvbGluZWFyR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQxX2xpbmVhcl8zMzc4XzY3OTYiIHgxPSItMC4wMDA0ODI1NTkiIHkxPSIxNC41ODk0IiB4Mj0iMzEuOTk5NSIgeTI9IjE0LjU4OTQiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzAwODJGQSIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwMEYyRkUiLz4KPC9saW5lYXJHcmFkaWVudD4KPGNsaXBQYXRoIGlkPSJjbGlwMF8zMzc4XzY3OTYiPgo8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSIxNiIgZmlsbD0id2hpdGUiLz4KPC9jbGlwUGF0aD4KPGNsaXBQYXRoIGlkPSJjbGlwMV8zMzc4XzY3OTYiPgo8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+",
+        injective:
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgY2xpcC1wYXRoPSJ1cmwoI2NsaXAwXzMzNzhfNjc5NikiPgo8ZyBjbGlwLXBhdGg9InVybCgjY2xpcDFfMzM3OF82Nzk2KSI+CjxwYXRoIGQ9Ik0zLjg4MDggNS41MjgxMkM0LjA4MDggNS4yODAxMiA0LjI4ODggNS4wNDAxMiA0LjQ5NjggNC44MDAxMkM0LjUwNDggNC43OTIxMiA0LjUyODggNC43ODQxMiA0LjUzNjggNC43NzYxMkM0LjU1MjggNC43NTIxMiA0LjU4NDggNC43MzYxMiA0LjYwODggNC43MTIxMkw0LjYyNDggNC42ODgxMkM0Ljc2ODggNC41NTIxMiA0LjkyODggNC40MDgxMiA1LjEwNDggNC4yNzIxMkM1Ljc0NDggMy43OTIxMiA2LjQwMDggMy40MjQxMiA3LjA5NjggMy4xNzYxMkM5LjMzNjggMi4zOTIxMiAxMS44MjQ4IDIuODcyMTIgMTMuNzc2OCA0LjcyMDEyQzE2LjUwNDggNy4yNzIxMiAxNi4yNTY4IDExLjM5MjEgMTQuMDgwOCAxNC4xMjgxQzExLjMyODggMTguMjA4MSA2LjYwODgxIDIzLjg5NjEgMTMuMTQ0OCAyOC45OTIxQzE0LjMyMDggMjkuOTEyMSAxNS4xOTI4IDMwLjY2NDEgMTguODk2OCAzMS43MzYxQzE2LjQ3MjggMzIuMTg0MSAxNC4yMjQ4IDMyLjA0MDEgMTEuNzI4OCAzMS40MDgxQzkuOTYwODEgMzAuNDA4MSA3LjE3NjggMjguMjcyMSA2LjIzMjggMjUuMzg0MUM0LjgwMDggMjEuMDA4MSA4Ljc1MjggMTQuNDU2MSAxMC42NTY4IDExLjkzNjFDMTMuMjcyOCA4LjQ0ODEyIDkuMDQwOCA0LjY3MjEyIDUuOTEyOCA4Ljg4ODEyQzQuMjk2OCAxMS4wODgxIDEuNDQwOCAxNy4zMDQxIDIuNDMyOCAyMS45MjAxQzMuMDA4OCAyNC41MzYxIDMuNzg0OCAyNi40NDAxIDYuODQ4OCAyOS4wNjQxQzYuMjgwOCAyOC43MjgxIDUuNzI4OCAyOC4zNTIxIDUuMTkyOCAyNy45MjAxQy0xLjkxOTIgMjEuMjg4MSAtMS4wOTUyIDExLjAzMjEgMy44ODA4IDUuNTI4MTJaIiBmaWxsPSJ1cmwoI3BhaW50MF9saW5lYXJfMzM3OF82Nzk2KSIvPgo8cGF0aCBkPSJNMjguMTE5NSAyNi40NzIzQzI3LjkxOTUgMjYuNzIwMyAyNy43MTE1IDI2Ljk2MDMgMjcuNTAzNSAyNy4yMDAzQzI3LjQ5NTUgMjcuMjA4MyAyNy40NzE1IDI3LjIxNjMgMjcuNDYzNSAyNy4yMjQzQzI3LjQ0NzUgMjcuMjQ4MyAyNy40MTU1IDI3LjI2NDMgMjcuMzkxNSAyNy4yODgzTDI3LjM3NTUgMjcuMzEyM0MyNy4yMzE1IDI3LjQ0ODMgMjcuMDcxNSAyNy41OTIzIDI2Ljg5NTUgMjcuNzIwM0MyNi4yNTU1IDI4LjIwMDMgMjUuNTk5NSAyOC41NjgzIDI0LjkwMzUgMjguODE2M0MyMi42NjM1IDI5LjYwMDMgMjAuMTc1NSAyOS4xMjAzIDE4LjIyMzUgMjcuMjcyM0MxNS40OTU1IDI0LjcyMDMgMTUuNzQzNSAyMC42MDAzIDE3LjkxOTUgMTcuODY0M0MyMC42NzE1IDEzLjc4NDMgMjUuMzkxNSA4LjA5NjMgMTguODU1NSAzLjAwMDNDMTcuNjc5NSAyLjA4MDMgMTYuODA3NSAxLjMyODMgMTMuMTAzNSAwLjI1NjI5OUMxNS41Mjc1IC0wLjE5MTcwMSAxNy43NzU1IC0wLjA0NzcwMDkgMjAuMjcxNSAwLjU4NDI5OUMyMi4wMzk1IDEuNTg0MyAyNC44MjM1IDMuNzIwMyAyNS43Njc1IDYuNjA4M0MyNy4xOTk1IDEwLjk4NDMgMjMuMjQ3NSAxNy41MzYzIDIxLjM0MzUgMjAuMDU2M0MxOC43Mjc1IDIzLjU0NDMgMjIuOTU5NSAyNy4zMjAzIDI2LjA4NzUgMjMuMTA0M0MyNy43MTk1IDIwLjkwNDMgMzAuNTc1NSAxNC42ODgzIDI5LjU4MzUgMTAuMDcyM0MyOS4wMDc1IDcuNDU2MyAyOC4yMzE1IDUuNTUyMyAyNS4xNjc1IDIuOTI4M0MyNS43MzU1IDMuMjY0MyAyNi4yODc1IDMuNjQwMyAyNi44MjM1IDQuMDcyM0MzMy45MTk1IDEwLjcxMjMgMzMuMDk1NSAyMC45NjgzIDI4LjExOTUgMjYuNDcyM1oiIGZpbGw9InVybCgjcGFpbnQxX2xpbmVhcl8zMzc4XzY3OTYpIi8+CjwvZz4KPC9nPgo8ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDBfbGluZWFyXzMzNzhfNjc5NiIgeDE9IjAuMDAwODAzOTg5IiB5MT0iMTcuNDExMSIgeDI9IjMyLjAwMDgiIHkyPSIxNy40MTExIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiMwMDgyRkEiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMDBGMkZFIi8+CjwvbGluZWFyR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQxX2xpbmVhcl8zMzc4XzY3OTYiIHgxPSItMC4wMDA0ODI1NTkiIHkxPSIxNC41ODk0IiB4Mj0iMzEuOTk5NSIgeTI9IjE0LjU4OTQiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzAwODJGQSIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiMwMEYyRkUiLz4KPC9saW5lYXJHcmFkaWVudD4KPGNsaXBQYXRoIGlkPSJjbGlwMF8zMzc4XzY3OTYiPgo8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHJ4PSIxNiIgZmlsbD0id2hpdGUiLz4KPC9jbGlwUGF0aD4KPGNsaXBQYXRoIGlkPSJjbGlwMV8zMzc4XzY3OTYiPgo8cmVjdCB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIGZpbGw9IndoaXRlIi8+CjwvY2xpcFBhdGg+CjwvZGVmcz4KPC9zdmc+",
+      };
+
+      const CHAIN_BG = {
+        eth: "#627eea",
+        ethereum: "#627eea",
+        bsc: "#f0b90b",
+        base: "#0052ff",
+        solana: "#9945ff",
+        sol: "#9945ff",
+        arb: "#213147",
+        arbitrum: "#213147",
+        op: "#e84142",
+        optimism: "#e84142",
+        matic: "#8247e5",
+        polygon: "#8247e5",
+        avax: "#e84142",
+        avalanche: "#e84142",
+        sei: "#c1121f",
+        inj: "#00f2fe",
+        injective: "#00f2fe",
+      };
+
+      function tokenIcon(symbol) {
+        const url = TOKEN_ICONS[symbol.toUpperCase()];
+        if (url)
+          return `<img src="${url}" alt="${symbol}" onerror="this.style.display='none'">`;
+        return symbol[0];
+      }
+
+      function chainIcon(chainKey) {
+        const k = chainKey.toLowerCase();
+        const url = CHAIN_ICONS[k];
+        const bg = CHAIN_BG[k] || "#4dd9d2";
+        if (url)
+          return `<img src="${url}" alt="${chainKey}" onerror="this.style.display='none'">`;
+        return `<span style="font-size:10px;font-weight:800;color:${bg}">${chainKey[0].toUpperCase()}</span>`;
+      }
+
+      function chainBg(chainKey) {
+        const k = chainKey.toLowerCase();
+        return CHAIN_BG[k] ? CHAIN_BG[k] + "18" : "rgba(77,217,210,0.12)";
+      }
+      function chainBorder(chainKey) {
+        const k = chainKey.toLowerCase();
+        return CHAIN_BG[k] ? CHAIN_BG[k] + "44" : "rgba(77,217,210,0.3)";
+      }
+      function parseChainFlow(chainText) {
+        const text = String(chainText || "").trim();
+        return text
+          .split(/\s*(?:→|->)\s*/g)
+          .map((s) => s.trim())
+          .filter(Boolean);
+      }
+      function resolveChainKey(label, fallback) {
+        const key = String(label || "").toLowerCase();
+        if (CHAIN_KEY_MAP[key]) return CHAIN_KEY_MAP[key];
+        return fallback ? String(fallback).toLowerCase() : key;
+      }
+      function formatComparisonDualChain(text) {
+        const src = String(text || "").trim();
+        const parts = parseChainFlow(src);
+        if (parts.length >= 2) {
+          return `O ${parts[0]} -> O ${parts[1]}`;
+        }
+        return src;
+      }
+
+      /* ════════════════════════════════
+   STATE
+════════════════════════════════ */
+      let currentTpl = "rate";
+
+      const state = {
+        comparison: {
+          eyebrow: "WHY CLOVIS",
+          h2line1: "Most protocols solve one problem on one chain.",
+          h2line2: "Clovis solves all four on every chain.",
+          themLabel: "Other Protocols",
+          tag1: "Four Yield Layers",
+          tag2: "Every Chain",
+          rows: [
+            {
+              icon: "🏛",
+              label: "Traditional Lending",
+              themMain: "Fragmented rates per chain",
+              themSub: "Isolated per chain",
+              clovisText: "Universal rates, one global pool",
+            },
+            {
+              icon: "⇄",
+              label: "DEX Liquidity",
+              themMain: "LP earns swap fees only",
+              themSub: "BNB -> Base",
+              clovisText: "LP earns lending + swap + bridge yield",
+            },
+            {
+              icon: "↔",
+              label: "Bridging",
+              themMain: "Transfer-only infrastructure",
+              themSub: "Bridging Fee Only",
+              clovisText: "Bridge liquidity generates yield",
+            },
+            {
+              icon: "⊞",
+              label: "Yield Strategies",
+              themMain: "Limited to one or two yield sources",
+              themSub: "Dual-yield, single-chain",
+              clovisText: "Cross-chain, four yield layers",
+            },
+          ],
+        },
+        rate: {
+          eyebrow: "Rate Intelligence · Clovis Vision X",
+          h2line1: "Same Asset,",
+          h2line2: "Different Yield",
+          sourceText:
+            "90-day averages ending Mar 6, 2026  ·  105 pools  ·  8 protocols  ·  8 chains\nSource: DefiLlama Yields API",
+          rows: [
+            {
+              asset: "USDT",
+              chain: "Ethereum",
+              chainKey: "eth",
+              lowProto: "Aave v3",
+              lowRate: "2.55%",
+              highProto: "Morpho",
+              highRate: "9.00%",
+              diff: "3.5×",
+              tier: "high",
+            },
+            {
+              asset: "USDC",
+              chain: "BSC → Base",
+              chainKey: "bsc",
+              lowProto: "Aave v3",
+              lowRate: "2.42%",
+              highProto: "Aave v3",
+              highRate: "3.61%",
+              diff: "1.49×",
+              tier: "mid",
+            },
+            {
+              asset: "USDC",
+              chain: "Ethereum",
+              chainKey: "eth",
+              lowProto: "Aave v3",
+              lowRate: "3.05%",
+              highProto: "Euler v2",
+              highRate: "4.61%",
+              diff: "1.51×",
+              tier: "mid",
+            },
+            {
+              asset: "USDC",
+              chain: "Base",
+              chainKey: "base",
+              lowProto: "Aave v3",
+              lowRate: "3.61%",
+              highProto: "Morpho",
+              highRate: "4.67%",
+              diff: "1.28×",
+              tier: "mid",
+            },
+            {
+              asset: "USDC",
+              chain: "Solana",
+              chainKey: "solana",
+              lowProto: "Kamino",
+              lowRate: "2.83%",
+              highProto: "Jupiter",
+              highRate: "4.01%",
+              diff: "1.42×",
+              tier: "mid",
+            },
+          ],
+        },
+        spread: {
+          eyebrow: "THE COST OF PASSIVE LENDING",
+          h2line1: "The Cost of",
+          h2line2: "Passive Lending",
+          sourceText:
+            "90-day averages ending March 6, 2026 — 105 pools, 8 protocols, 8 chains (DefiLlama Yields API)",
+          rows: [
+            {
+              asset: "USDT",
+              chain: "Ethereum",
+              chainKey: "eth",
+              lowProto: "Aave v3",
+              lowRate: "2.55",
+              highProto: "Morpho",
+              highRate: "9.00",
+              diff: "3.5×",
+              tier: "high",
+            },
+            {
+              asset: "USDC",
+              chain: "BSC → Base",
+              chainKey: "bsc",
+              lowProto: "Aave v3",
+              lowRate: "2.42",
+              highProto: "Aave v3",
+              highRate: "3.61",
+              diff: "1.49×",
+              tier: "mid",
+            },
+            {
+              asset: "USDC",
+              chain: "Ethereum",
+              chainKey: "eth",
+              lowProto: "Aave v3",
+              lowRate: "3.05",
+              highProto: "Euler v2",
+              highRate: "4.61",
+              diff: "1.51×",
+              tier: "mid",
+            },
+            {
+              asset: "USDC",
+              chain: "Base",
+              chainKey: "base",
+              lowProto: "Aave v3",
+              lowRate: "3.61",
+              highProto: "Morpho",
+              highRate: "4.67",
+              diff: "1.28×",
+              tier: "mid",
+            },
+            {
+              asset: "USDC",
+              chain: "Solana",
+              chainKey: "solana",
+              lowProto: "Kamino",
+              lowRate: "2.83",
+              highProto: "Jupiter",
+              highRate: "4.01",
+              diff: "1.42×",
+              tier: "mid",
+            },
+          ],
+        },
+      };
+
+      /* ════════════════════════════════
+   RENDER EDITOR
+════════════════════════════════ */
+      const CHAIN_OPTIONS = [
+        "Ethereum",
+        "BSC",
+        "Base",
+        "BSC → Base",
+        "Solana",
+        "Arbitrum",
+        "Optimism",
+        "Polygon",
+        "Avalanche",
+        "Sei",
+        "Injective",
+      ];
+      const CHAIN_KEY_MAP = {
+        ethereum: "eth",
+        bsc: "bsc",
+        bnb: "bsc",
+        "binance smart chain": "bsc",
+        base: "base",
+        "bsc → base": "bsc",
+        solana: "solana",
+        arbitrum: "arb",
+        optimism: "op",
+        polygon: "matic",
+        avalanche: "avax",
+        sei: "sei",
+        injective: "inj",
+      };
+
+      function renderEditor() {
+        const panel = document.getElementById("editor-panel");
+        const s = state[currentTpl];
+
+        if (currentTpl === "comparison") {
+          panel.innerHTML = `
+      <div class="panel-section">
+        <div class="panel-title">Header</div>
+        <div class="field-group"><div class="field-label">Eyebrow</div>
+          <input class="field-input" value="${e(s.eyebrow)}" oninput="state.comparison.eyebrow=this.value;renderSlide()"></div>
+        <div class="field-group"><div class="field-label">Headline line 1</div>
+          <input class="field-input" value="${e(s.h2line1)}" oninput="state.comparison.h2line1=this.value;renderSlide()"></div>
+        <div class="field-group"><div class="field-label">Headline line 2 (gradient)</div>
+          <input class="field-input" value="${e(s.h2line2)}" oninput="state.comparison.h2line2=this.value;renderSlide()"></div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-title">Columns</div>
+        <div class="field-group"><div class="field-label">Competitor column label</div>
+          <input class="field-input" value="${e(s.themLabel)}" oninput="state.comparison.themLabel=this.value;renderSlide()"></div>
+        <div class="row-grid2">
+          <div class="field-group"><div class="field-label">Tag 1</div>
+            <input class="field-input" value="${e(s.tag1)}" oninput="state.comparison.tag1=this.value;renderSlide()"></div>
+          <div class="field-group"><div class="field-label">Tag 2</div>
+            <input class="field-input" value="${e(s.tag2)}" oninput="state.comparison.tag2=this.value;renderSlide()"></div>
+        </div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-title">Rows</div>
+        ${s.rows
+          .map(
+            (row, i) => `
+          <div class="row-editor">
+            <div class="row-editor-hd"><span class="row-num">ROW ${i + 1}</span><button class="btn-del" onclick="delCompRow(${i})">✕</button></div>
+            <div class="field-group"><div class="field-label">Icon (emoji)</div>
+              <input class="field-input" value="${e(row.icon)}" oninput="state.comparison.rows[${i}].icon=this.value;renderSlide()"></div>
+            <div class="field-group"><div class="field-label">Category</div>
+              <input class="field-input" value="${e(row.label)}" oninput="state.comparison.rows[${i}].label=this.value;renderSlide()"></div>
+            <div class="field-group"><div class="field-label">Competitor main text</div>
+              <input class="field-input" value="${e(row.themMain)}" oninput="state.comparison.rows[${i}].themMain=this.value;renderSlide()"></div>
+            <div class="field-group"><div class="field-label">Competitor sub text</div>
+              <input class="field-input" value="${e(row.themSub)}" oninput="state.comparison.rows[${i}].themSub=this.value;renderSlide()"></div>
+            <div class="field-group"><div class="field-label">Clovis advantage</div>
+              <input class="field-input" value="${e(row.clovisText)}" oninput="state.comparison.rows[${i}].clovisText=this.value;renderSlide()"></div>
+          </div>
+        `,
+          )
+          .join("")}
+        <button class="btn-add-row" onclick="addCompRow()">+ Add Row</button>
+      </div>`;
+        } else if (currentTpl === "rate") {
+          panel.innerHTML = `
+      <div class="panel-section">
+        <div class="panel-title">Header</div>
+        <div class="field-group"><div class="field-label">Eyebrow</div>
+          <input class="field-input" value="${e(s.eyebrow)}" oninput="state.rate.eyebrow=this.value;renderSlide()"></div>
+        <div class="field-group"><div class="field-label">Title — regular</div>
+          <input class="field-input" value="${e(s.h2line1)}" oninput="state.rate.h2line1=this.value;renderSlide()"></div>
+        <div class="field-group"><div class="field-label">Title — gradient</div>
+          <input class="field-input" value="${e(s.h2line2)}" oninput="state.rate.h2line2=this.value;renderSlide()"></div>
+      </div>
+      <div class="panel-section">
+        <div class="panel-title">Data Rows</div>
+        ${s.rows
+          .map(
+            (row, i) => `
+          <div class="row-editor">
+            <div class="row-editor-hd"><span class="row-num">ROW ${i + 1}</span><button class="btn-del" onclick="delRateRow(${i})">✕</button></div>
+            <div class="row-grid2">
+              <div class="field-group"><div class="field-label">Token</div>
+                <select class="field-select" onchange="state.rate.rows[${i}].asset=this.value;renderSlide()">
+                  <option ${row.asset === "USDT" ? "selected" : ""}>USDT</option>
+                  <option ${row.asset === "USDC" ? "selected" : ""}>USDC</option>
+                  <option ${row.asset === "USDT" || row.asset === "USDC" ? "" : row.asset === "ETH" ? "selected" : ""}>ETH</option>
+                  <option ${row.asset === "BTC" ? "selected" : ""}>BTC</option>
+                  <option value="custom" ${!["USDT", "USDC", "ETH", "BTC"].includes(row.asset) ? "selected" : ""}>Other…</option>
+                </select>
+              </div>
+              <div class="field-group"><div class="field-label">Chain</div>
+                <select class="field-select" onchange="state.rate.rows[${i}].chain=this.value;state.rate.rows[${i}].chainKey=(CHAIN_KEY_MAP[this.value.toLowerCase()]||this.value.toLowerCase());renderSlide()">
+                  ${CHAIN_OPTIONS.map((c) => `<option ${row.chain === c ? "selected" : ""}>${c}</option>`).join("")}
+                </select>
+              </div>
+            </div>
+            <div class="row-grid2">
+              <div class="field-group"><div class="field-label">Low Protocol</div>
+                <input class="field-input" value="${e(row.lowProto)}" oninput="state.rate.rows[${i}].lowProto=this.value;renderSlide()"></div>
+              <div class="field-group"><div class="field-label">Low Rate</div>
+                <input class="field-input" value="${e(row.lowRate)}" oninput="state.rate.rows[${i}].lowRate=this.value;renderSlide()"></div>
+            </div>
+            <div class="row-grid2">
+              <div class="field-group"><div class="field-label">High Protocol</div>
+                <input class="field-input" value="${e(row.highProto)}" oninput="state.rate.rows[${i}].highProto=this.value;renderSlide()"></div>
+              <div class="field-group"><div class="field-label">High Rate</div>
+                <input class="field-input" value="${e(row.highRate)}" oninput="state.rate.rows[${i}].highRate=this.value;renderSlide()"></div>
+            </div>
+            <div class="row-grid2">
+              <div class="field-group"><div class="field-label">Differential</div>
+                <input class="field-input" value="${e(row.diff)}" oninput="state.rate.rows[${i}].diff=this.value;renderSlide()"></div>
+              <div class="field-group"><div class="field-label">Tier</div>
+                <select class="field-select" onchange="state.rate.rows[${i}].tier=this.value;renderSlide()">
+                  <option value="mid" ${row.tier === "mid" ? "selected" : ""}>Normal</option>
+                  <option value="high" ${row.tier === "high" ? "selected" : ""}>Highlight</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        `,
+          )
+          .join("")}
+        <button class="btn-add-row" onclick="addRateRow()">+ Add Row</button>
+      </div>
+      <div class="panel-section">
+        <div class="panel-title">Footer</div>
+        <div class="field-group"><div class="field-label">Source text</div>
+          <textarea class="field-input" rows="3" oninput="state.rate.sourceText=this.value;renderSlide()">${s.sourceText}</textarea></div>
+      </div>`;
+        } else if (currentTpl === "spread") {
+          const s = state.spread;
+          panel.innerHTML = `
+      <div class="panel-title">Header</div>
+      <div class="field-row"><div class="field-label">Eyebrow</div>
+        <input class="field-input" value="${e(s.eyebrow)}" oninput="state.spread.eyebrow=this.value;renderSlide()"></div>
+      <div class="field-row"><div class="field-label">Title Line 1</div>
+        <input class="field-input" value="${e(s.h2line1)}" oninput="state.spread.h2line1=this.value;renderSlide()"></div>
+      <div class="field-row"><div class="field-label">Title Line 2 (accent)</div>
+        <input class="field-input" value="${e(s.h2line2)}" oninput="state.spread.h2line2=this.value;renderSlide()"></div>
+      <div class="panel-title">Data Rows</div>
+      ${s.rows
+        .map(
+          (row, i) => `
+        <div class="row-card">
+          <div class="row-card-hd">
+            <span class="row-num">#${i + 1}</span>
+            <button class="btn-del" onclick="delSpreadRow(${i})">&#x2715;</button>
+          </div>
+          <div class="row-grid2">
+            <div><div class="field-label">Asset</div>
+              <input class="field-input" value="${e(row.asset)}" oninput="state.spread.rows[${i}].asset=this.value;renderSlide()"></div>
+            <div><div class="field-label">Chain</div>
+              <select class="field-select" onchange="state.spread.rows[${i}].chain=this.value;state.spread.rows[${i}].chainKey=CHAIN_KEY_MAP[this.value.toLowerCase()]||this.value.toLowerCase();renderSlide()">
+                ${CHAIN_OPTIONS.map((c) => "<option " + (c === row.chain ? "selected" : "") + ">" + c + "</option>").join("")}
+              </select></div>
+          </div>
+          <div class="row-grid2">
+            <div><div class="field-label">Low Protocol</div>
+              <input class="field-input" value="${e(row.lowProto)}" oninput="state.spread.rows[${i}].lowProto=this.value;renderSlide()"></div>
+            <div><div class="field-label">Low Rate %</div>
+              <input class="field-input" value="${e(row.lowRate)}" oninput="state.spread.rows[${i}].lowRate=this.value;renderSlide()"></div>
+          </div>
+          <div class="row-grid2">
+            <div><div class="field-label">High Protocol</div>
+              <input class="field-input" value="${e(row.highProto)}" oninput="state.spread.rows[${i}].highProto=this.value;renderSlide()"></div>
+            <div><div class="field-label">High Rate %</div>
+              <input class="field-input" value="${e(row.highRate)}" oninput="state.spread.rows[${i}].highRate=this.value;renderSlide()"></div>
+          </div>
+        </div>
+      `,
+        )
+        .join("")}
+      <button class="btn-add-row" onclick="addSpreadRow()">+ Add Row</button>
+      <div class="panel-title">Footer</div>
+      <div class="field-row"><div class="field-label">Source Text</div>
+        <textarea class="field-input" rows="2" oninput="state.spread.sourceText=this.value;renderSlide()">${e(s.sourceText)}</textarea></div>
+    `;
+        }
+      }
+
+      /* ════════════════════════════════
+   RENDER SLIDE
+════════════════════════════════ */
+      const LOGO_MARK_B64 =
+        "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iODkiIGhlaWdodD0iODkiIHZpZXdCb3g9IjAgMCA4OSA4OSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGcgb3BhY2l0eT0iMC42Ij4KPGcgZmlsdGVyPSJ1cmwoI2ZpbHRlcjBfaV8yNTdfMjk5MSkiPgo8cGF0aCBkPSJNNi4zNTcxOCA2My4yNjlMNi4zNTcxOCAyNS43MzEyQzYuMzU3MTggMjMuMjQ1NCA3LjYzNzkgMjAuOTQ2MyA5LjcyMTA3IDE5LjcwMjFMNDEuMTM2MiAwLjkzMzE3QzQzLjIxNjggLTAuMzExMDU3IDQ1Ljc4MDkgLTAuMzExMDU3IDQ3Ljg2NCAwLjkzMzE3TDc5LjI3OTEgMTkuNzAyMUM4MS4zNTk1IDIwLjk0MzYgODIuNjQyOSAyMy4yNDI3IDgyLjY0MjkgMjUuNzMxMkw4Mi42NDI5IDYzLjI2OUM4Mi42NDI5IDY1Ljc1NDcgODEuMzYyMiA2OC4wNTM5IDc5LjI3OTEgNjkuMjk4MUw0Ny44NjQgODguMDY2OEM0NS43ODM0IDg5LjMxMTEgNDMuMjE5MiA4OS4zMTExIDQxLjEzNjIgODguMDY2OEw5LjcyMTA3IDY5LjI5ODFDNy42NDA1IDY4LjA1NjQgNi4zNTcxOCA2NS43NTc1IDYuMzU3MTggNjMuMjY5WiIgZmlsbD0iIzAwMTgyMyIvPgo8cGF0aCBkPSJNNi4zNTcxOCA2My4yNjlMNi4zNTcxOCAyNS43MzEyQzYuMzU3MTggMjMuMjQ1NCA3LjYzNzkgMjAuOTQ2MyA5LjcyMTA3IDE5LjcwMjFMNDEuMTM2MiAwLjkzMzE3QzQzLjIxNjggLTAuMzExMDU3IDQ1Ljc4MDkgLTAuMzExMDU3IDQ3Ljg2NCAwLjkzMzE3TDc5LjI3OTEgMTkuNzAyMUM4MS4zNTk1IDIwLjk0MzYgODIuNjQyOSAyMy4yNDI3IDgyLjY0MjkgMjUuNzMxMkw4Mi42NDI5IDYzLjI2OUM4Mi42NDI5IDY1Ljc1NDcgODEuMzYyMiA2OC4wNTM5IDc5LjI3OTEgNjkuMjk4MUw0Ny44NjQgODguMDY2OEM0NS43ODM0IDg5LjMxMTEgNDMuMjE5MiA4OS4zMTExIDQxLjEzNjIgODguMDY2OEw5LjcyMTA3IDY5LjI5ODFDNy42NDA1IDY4LjA1NjQgNi4zNTcxOCA2NS43NTc1IDYuMzU3MTggNjMuMjY5WiIgZmlsbD0idXJsKCNwYWludDBfbGluZWFyXzI1N18yOTkxKSIgZmlsbC1vcGFjaXR5PSIwLjE4Ii8+CjwvZz4KPHBhdGggZD0iTTQxLjcxMjYgMS44OTc0NkM0My40Mzc4IDAuODY1Nzc5IDQ1LjU1OTUgMC44NjUxOSA0Ny4yODc4IDEuODk3NDZMNzguNzAyOSAyMC42NjdDODAuNDMyNiAyMS42OTkyIDgxLjUxOTMgMjMuNjI1OCA4MS41MTkzIDI1LjczMTRMODEuNTE5MyA2My4yNjg2QzgxLjUxOTMgNjUuMzcxNiA4MC40MzUzIDY3LjI5ODEgNzguNzAyOSA2OC4zMzNMNDcuMjg3OCA4Ny4xMDI1SDQ3LjI4NjlDNDUuNTYxOCA4OC4xMzQgNDMuNDQwOCA4OC4xMzQ2IDQxLjcxMjYgODcuMTAyNUwxMC4yOTc2IDY4LjMzM0gxMC4yOTY2QzguNTY2ODUgNjcuMzAwNSA3LjQ4MTIgNjUuMzc0MSA3LjQ4MTIgNjMuMjY4Nkw3LjQ4MTIgMjUuNzMxNEM3LjQ4MTIgMjMuNjI4MyA4LjU2NDk3IDIxLjcwMTggMTAuMjk3NiAyMC42NjdMNDEuNzEyNiAxLjg5NzQ2WiIgc3Ryb2tlPSJ1cmwoI3BhaW50MV9saW5lYXJfMjU3XzI5OTEpIiBzdHJva2Utd2lkdGg9IjIuMjQ3NDciLz4KPGcgZmlsdGVyPSJ1cmwoI2ZpbHRlcjFfZGlpXzI1N18yOTkxKSI+CjxwYXRoIGQ9Ik00Mi4yMzg1IDU5LjM0MDhWNTkuMzQyOEw1MS41NTQ5IDY0Ljc5MUw0NC43NDA1IDY4Ljc3MTVMMzIuOTExNCA2MS44NjIzVjUzLjg5MjZMNDIuMjM4NSA1OS4zNDA4Wk02NS40OTA1IDU2LjY1MjNMNTMuNzAwNCA2My41MzgxTDQ2Ljg4NCA1OS41NTE4TDU4LjY2OTIgNTIuNjY4OUw2NS40OTA1IDU2LjY1MjNaTTMwLjc4ODMgNDcuNTcwM0wzMC43NjU5IDQ3LjU4NEwzMC43NjQ5IDYwLjYwODRMMjMuOTYyMiA1Ni42MzQ4VjQyLjg3N0wzMC43ODkzIDM4Ljg4OTZMMzAuNzg4MyA0Ny41NzAzWk00Mi42MzUgMjkuNDMzNkwzMC43ODgzIDM2LjM1MjVWMzYuMzgyOEwyMy45NjIyIDQwLjM3MDFWMzIuMzYzM0wzNS44MDY5IDI1LjQ0NTNMNDIuNjM1IDI5LjQzMzZaTTYzLjczMjcgMzEuMzE5M0w1Ni45NDQ2IDM1LjI4NDJMMzcuOTUyNCAyNC4xOTI0TDQ0Ljc0MDUgMjAuMjI2Nkw2My43MzI3IDMxLjMxOTNaIiBmaWxsPSJ1cmwoI3BhaW50Ml9yYWRpYWxfMjU3XzI5OTEpIi8+CjwvZz4KPC9nPgo8ZGVmcz4KPGZpbHRlciBpZD0iZmlsdGVyMF9pXzI1N18yOTkxIiB4PSI2LjM1NzE4IiB5PSIwIiB3aWR0aD0iNzYuNzc4IiBoZWlnaHQ9Ijg5LjQ5MjQiIGZpbHRlclVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgY29sb3ItaW50ZXJwb2xhdGlvbi1maWx0ZXJzPSJzUkdCIj4KPGZlRmxvb2QgZmxvb2Qtb3BhY2l0eT0iMCIgcmVzdWx0PSJCYWNrZ3JvdW5kSW1hZ2VGaXgiLz4KPGZlQmxlbmQgbW9kZT0ibm9ybWFsIiBpbj0iU291cmNlR3JhcGhpYyIgaW4yPSJCYWNrZ3JvdW5kSW1hZ2VGaXgiIHJlc3VsdD0ic2hhcGUiLz4KPGZlQ29sb3JNYXRyaXggaW49IlNvdXJjZUFscGhhIiB0eXBlPSJtYXRyaXgiIHZhbHVlcz0iMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMTI3IDAiIHJlc3VsdD0iaGFyZEFscGhhIi8+CjxmZU9mZnNldCBkeD0iMC40OTIzNzgiIGR5PSIwLjQ5MjM3OCIvPgo8ZmVHYXVzc2lhbkJsdXIgc3RkRGV2aWF0aW9uPSIxLjIzMDk0Ii8+CjxmZUNvbXBvc2l0ZSBpbjI9ImhhcmRBbHBoYSIgb3BlcmF0b3I9ImFyaXRobWV0aWMiIGsyPSItMSIgazM9IjEiLz4KPGZlQ29sb3JNYXRyaXggdHlwZT0ibWF0cml4IiB2YWx1ZXM9IjAgMCAwIDAgMC43NzgzMzggMCAwIDAgMCAwLjkxMzAxOSAwIDAgMCAwIDEgMCAwIDAgMSAwIi8+CjxmZUJsZW5kIG1vZGU9InNjcmVlbiIgaW4yPSJzaGFwZSIgcmVzdWx0PSJlZmZlY3QxX2lubmVyU2hhZG93XzI1N18yOTkxIi8+CjwvZmlsdGVyPgo8ZmlsdGVyIGlkPSJmaWx0ZXIxX2RpaV8yNTdfMjk5MSIgeD0iMjMuMjIzNiIgeT0iMTkuNDg4IiB3aWR0aD0iNDMuOTkwMiIgaGVpZ2h0PSI1MS4wMDY4IiBmaWx0ZXJVbml0cz0idXNlclNwYWNlT25Vc2UiIGNvbG9yLWludGVycG9sYXRpb24tZmlsdGVycz0ic1JHQiI+CjxmZUZsb29kIGZsb29kLW9wYWNpdHk9IjAiIHJlc3VsdD0iQmFja2dyb3VuZEltYWdlRml4Ii8+CjxmZUNvbG9yTWF0cml4IGluPSJTb3VyY2VBbHBoYSIgdHlwZT0ibWF0cml4IiB2YWx1ZXM9IjAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDEyNyAwIiByZXN1bHQ9ImhhcmRBbHBoYSIvPgo8ZmVPZmZzZXQgZHg9IjAuNDkyMzc4IiBkeT0iMC40OTIzNzgiLz4KPGZlR2F1c3NpYW5CbHVyIHN0ZERldmlhdGlvbj0iMC42MTU0NzIiLz4KPGZlQ29tcG9zaXRlIGluMj0iaGFyZEFscGhhIiBvcGVyYXRvcj0ib3V0Ii8+CjxmZUNvbG9yTWF0cml4IHR5cGU9Im1hdHJpeCIgdmFsdWVzPSIwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwLjYgMCIvPgo8ZmVCbGVuZCBtb2RlPSJub3JtYWwiIGluMj0iQmFja2dyb3VuZEltYWdlRml4IiByZXN1bHQ9ImVmZmVjdDFfZHJvcFNoYWRvd18yNTdfMjk5MSIvPgo8ZmVCbGVuZCBtb2RlPSJub3JtYWwiIGluPSJTb3VyY2VHcmFwaGljIiBpbjI9ImVmZmVjdDFfZHJvcFNoYWRvd18yNTdfMjk5MSIgcmVzdWx0PSJzaGFwZSIvPgo8ZmVDb2xvck1hdHJpeCBpbj0iU291cmNlQWxwaGEiIHR5cGU9Im1hdHJpeCIgdmFsdWVzPSIwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAxMjcgMCIgcmVzdWx0PSJoYXJkQWxwaGEiLz4KPGZlT2Zmc2V0IGR4PSIwLjQ5MjM3OCIgZHk9IjAuNDkyMzc4Ii8+CjxmZUdhdXNzaWFuQmx1ciBzdGREZXZpYXRpb249IjEuMjMwOTQiLz4KPGZlQ29tcG9zaXRlIGluMj0iaGFyZEFscGhhIiBvcGVyYXRvcj0iYXJpdGhtZXRpYyIgazI9Ii0xIiBrMz0iMSIvPgo8ZmVDb2xvck1hdHJpeCB0eXBlPSJtYXRyaXgiIHZhbHVlcz0iMCAwIDAgMCAwLjc3ODMzOCAwIDAgMCAwIDAuOTEzMDE5IDAgMCAwIDAgMSAwIDAgMCAxIDAiLz4KPGZlQmxlbmQgbW9kZT0ic2NyZWVuIiBpbjI9InNoYXBlIiByZXN1bHQ9ImVmZmVjdDJfaW5uZXJTaGFkb3dfMjU3XzI5OTEiLz4KPGZlQ29sb3JNYXRyaXggaW49IlNvdXJjZUFscGhhIiB0eXBlPSJtYXRyaXgiIHZhbHVlcz0iMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMCAwIDAgMTI3IDAiIHJlc3VsdD0iaGFyZEFscGhhIi8+CjxmZU9mZnNldCBkeD0iLTAuNDkyMzc4IiBkeT0iLTAuNDkyMzc4Ii8+CjxmZUdhdXNzaWFuQmx1ciBzdGREZXZpYXRpb249IjEuMjMwOTQiLz4KPGZlQ29tcG9zaXRlIGluMj0iaGFyZEFscGhhIiBvcGVyYXRvcj0iYXJpdGhtZXRpYyIgazI9Ii0xIiBrMz0iMSIvPgo8ZmVDb2xvck1hdHJpeCB0eXBlPSJtYXRyaXgiIHZhbHVlcz0iMCAwIDAgMCAwLjA4NDYyMDkgMCAwIDAgMCAwLjM3NDA4MyAwIDAgMCAwIDAuNTYxMDI4IDAgMCAwIDEgMCIvPgo8ZmVCbGVuZCBtb2RlPSJwbHVzLWxpZ2h0ZXIiIGluMj0iZWZmZWN0Ml9pbm5lclNoYWRvd18yNTdfMjk5MSIgcmVzdWx0PSJlZmZlY3QzX2lubmVyU2hhZG93XzI1N18yOTkxIi8+CjwvZmlsdGVyPgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MF9saW5lYXJfMjU3XzI5OTEiIHgxPSIxMy4wOTg0IiB5MT0iMTguNTc3MiIgeDI9IjU3LjczNDciIHkyPSI4NS40NjMyIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiNFNUY5RkYiIHN0b3Atb3BhY2l0eT0iMC42Ii8+CjxzdG9wIG9mZnNldD0iMC4zMzUwODgiIHN0b3AtY29sb3I9IiMwMEM0RkYiIHN0b3Atb3BhY2l0eT0iMC4wNCIvPgo8c3RvcCBvZmZzZXQ9IjAuNjcxNzAzIiBzdG9wLWNvbG9yPSIjMDA3ODlGIi8+CjxzdG9wIG9mZnNldD0iMC44NjUiIHN0b3AtY29sb3I9IiMyRkQ5RkYiLz4KPC9saW5lYXJHcmFkaWVudD4KPGxpbmVhckdyYWRpZW50IGlkPSJwYWludDFfbGluZWFyXzI1N18yOTkxIiB4MT0iMTcuMTcwMSIgeTE9IjE2LjEwNTgiIHgyPSI2MS45NTYxIiB5Mj0iODMuMjE2IiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiNFRUY4RkYiIHN0b3Atb3BhY2l0eT0iMC42Ii8+CjxzdG9wIG9mZnNldD0iMC4zMTQzMDUiIHN0b3AtY29sb3I9IiMwMEIzRkYiIHN0b3Atb3BhY2l0eT0iMC4wNCIvPgo8c3RvcCBvZmZzZXQ9IjAuNzE2NDgxIiBzdG9wLWNvbG9yPSIjMDA3ODlGIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iIzJGRDlGRiIvPgo8L2xpbmVhckdyYWRpZW50Pgo8cmFkaWFsR3JhZGllbnQgaWQ9InBhaW50Ml9yYWRpYWxfMjU3XzI5OTEiIGN4PSIwIiBjeT0iMCIgcj0iMSIgZ3JhZGllbnRUcmFuc2Zvcm09Im1hdHJpeCgyNS43Njk1IC0zNy4zNTgyIDU4LjQ4MDMgNDEuMjgyIDM0LjgzODIgNjIuNjMwNCkiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iIzAwRTNCMiIvPgo8c3RvcCBvZmZzZXQ9IjAuOCIgc3RvcC1jb2xvcj0iIzAwQzRGRiIvPgo8L3JhZGlhbEdyYWRpZW50Pgo8L2RlZnM+Cjwvc3ZnPgo=";
+
+      function renderSlide() {
+        const slide = document.getElementById("slide-output");
+        const s = state[currentTpl];
+
+        if (currentTpl === "comparison") {
+          slide.innerHTML = `
+      <img class="slide-bg-logo" src="${LOGO_MARK_B64}" alt="" />
+      <div class="slide-container">
+        <div class="slide-heading">
+          <p class="slide-eyebrow">${s.eyebrow}</p>
+          <div class="slide-h2">
+            ${s.h2line1}
+            <span class="grad">${s.h2line2}</span>
+          </div>
+        </div>
+        <div class="comp-table">
+          <div class="comp-row-hd">
+            <div class="col-spacer"></div>
+            <div class="col-them-hd"><span class="them-lbl">${s.themLabel}</span></div>
+            <div class="col-clovis-hd">
+              <div class="clovis-logo-txt">CLOVIS</div>
+              <div class="clovis-tags"><span class="clovis-tag">${s.tag1}</span><span class="clovis-tag">${s.tag2}</span></div>
+            </div>
+          </div>
+          ${s.rows
+            .map(
+              (row) => `
+            <div class="comp-row">
+              <div class="col-lbl">
+                <div class="row-icon-box">${row.icon}</div>
+                <div class="row-title">${row.label}</div>
+              </div>
+              <div class="col-them">
+                <div class="them-main">${row.themMain}</div>
+                <div class="them-sub">${formatComparisonDualChain(row.themSub)}</div>
+              </div>
+              <div class="col-clovis">
+                <div class="clovis-cell">
+                  <span class="star-ic">✦</span>
+                  <span class="clovis-txt">${row.clovisText}</span>
+                </div>
+              </div>
+            </div>
+          `,
+            )
+            .join("")}
+        </div>
+      </div>`;
+        } else if (currentTpl === "rate") {
+          // rate table
+          const maxPct = 9;
+          slide.innerHTML = `
+      <img class="slide-bg-logo" src="${LOGO_MARK_B64}" alt="" />
+      <div class="slide-container">
+        <div class="slide-heading">
+          <p class="slide-eyebrow">${s.eyebrow}</p>
+          <div class="slide-h2">
+            ${s.h2line1} <span class="grad">${s.h2line2}</span>
+          </div>
+        </div>
+
+        <div class="rate-wrap">
+          <div class="rate-col-headers">
+            <div class="rch">Asset</div>
+            <div class="rch">Chain</div>
+            <div class="rch">↓&nbsp;&nbsp;Low Protocol</div>
+            <div class="rch">↑&nbsp;&nbsp;High Protocol</div>
+            <div class="rch right">Rate Differential</div>
+          </div>
+          ${s.rows
+            .map((row) => {
+              const lo = parseFloat(row.lowRate) || 0;
+              const hi = parseFloat(row.highRate) || 0;
+              const loW = Math.round((lo / maxPct) * 64);
+              const hiW = Math.max(Math.round(((hi - lo) / maxPct) * 64), 6);
+              const chainParts = parseChainFlow(row.chain);
+              const fromLabel = chainParts[0] || row.chain;
+              const toLabel = chainParts[1] || "";
+              const ck = resolveChainKey(
+                fromLabel,
+                row.chainKey || row.chain.toLowerCase(),
+              );
+              const toKey = toLabel ? resolveChainKey(toLabel) : "";
+              const cbg = chainBg(ck);
+              const cborder = chainBorder(ck);
+              const toBg = toKey ? chainBg(toKey) : "";
+              const toBorder = toKey ? chainBorder(toKey) : "";
+              return `
+              <div class="rate-row">
+                <div class="rcell">
+                  <span class="token-pill">
+                    <span class="token-icon">${tokenIcon(row.asset)}</span>
+                    ${row.asset}
+                  </span>
+                </div>
+                <div class="rcell">
+                  <div class="chain-badge">
+                    ${
+                      toKey
+                        ? `<span class="chain-flow-part"><div class="chain-icon" style="background:${cbg};border:1px solid ${cborder}">${chainIcon(ck)}</div><span class="chain-flow-name">${e(fromLabel)}</span></span><span class="chain-arrow">-></span><span class="chain-flow-part"><div class="chain-icon" style="background:${toBg};border:1px solid ${toBorder}">${chainIcon(toKey)}</div><span class="chain-flow-name">${e(toLabel)}</span></span>`
+                        : `<div class="chain-icon" style="background:${cbg};border:1px solid ${cborder}">${chainIcon(ck)}</div><span class="chain-name">${e(fromLabel)}</span>`
+                    }
+                  </div>
+                </div>
+                <div class="rcell">
+                  <div class="rate-cell">
+                    <div class="proto-lbl">${row.lowProto}</div>
+                    <div class="rate-num rate-low">${row.lowRate}</div>
+                    <div class="bar-row"><div class="bar-b" style="width:${loW}px"></div></div>
+                  </div>
+                </div>
+                <div class="rcell">
+                  <div class="rate-cell">
+                    <div class="proto-lbl">${row.highProto}</div>
+                    <div class="rate-num rate-high">${row.highRate}</div>
+                    <div class="bar-row">
+                      <div class="bar-b" style="width:${loW}px"></div>
+                      <div class="bar-s" style="width:${hiW}px"></div>
+                    </div>
+                  </div>
+                </div>
+                <div class="rcell">
+                  <div class="diff-wrap">
+                    <div class="diff-badge ${row.tier === "high" ? "diff-high" : "diff-mid"}">
+                      <span style="font-size:13px;opacity:.9">▲</span>${row.diff}
+                    </div>
+                  </div>
+                </div>
+              </div>`;
+            })
+            .join("")}
+        </div>
+
+        ${
+          s.sourceText
+            ? `
+          <div class="slide-footer">
+            <div class="slide-source">${s.sourceText.replace(/\n/g, "<br>").replace(/(Mar \d+, \d+|\d+ pools|\d+ protocols|\d+ chains)/g, '<span class="hl">$1</span>')}</div>
+            <div class="slide-brand">Clovis</div>
+          </div>`
+            : ""
+        }
+      </div>`;
+        } else if (currentTpl === "spread") {
+          const s = state.spread;
+          // calculate scale: max rate across all rows
+          const allHi = s.rows.map((r) => parseFloat(r.highRate) || 0);
+          const maxRate = Math.max(...allHi, 10);
+          const BAR_W = 720; // total bar width in px
+
+          slide.innerHTML = `
+      <img class="slide-bg-logo" src="${LOGO_MARK_B64}" alt="" />
+      <div class="slide-container">
+        <div class="slide-heading">
+          <p class="slide-eyebrow">${s.eyebrow}</p>
+          <div class="slide-h2">
+            ${s.h2line1}
+            <span class="grad">${s.h2line2}</span>
+          </div>
+        </div>
+
+        <div class="spread-chart">
+          <!-- axis label row -->
+          <div class="spread-axis-row">
+            <div></div>
+            <div class="spread-axis-labels">
+              ${Array.from({ length: 6 }, (_, i) => {
+                const v = ((maxRate / 5) * i).toFixed(1).replace(".0", "");
+                return '<span class="spread-axis-lbl">' + v + "%</span>";
+              }).join("")}
+            </div>
+            <div></div>
+          </div>
+
+          ${s.rows
+            .map((row, ri) => {
+              const lo = parseFloat(row.lowRate) || 0;
+              const hi = parseFloat(row.highRate) || 0;
+              const loW = Math.max(Math.round((lo / maxRate) * BAR_W), 8);
+              const hiW = Math.max(Math.round((hi / maxRate) * BAR_W), 8);
+              const chainParts = parseChainFlow(row.chain);
+              const fromLabel = chainParts[0] || row.chain;
+              const toLabel = chainParts[1] || "";
+              const ck = resolveChainKey(
+                fromLabel,
+                row.chainKey || row.chain.toLowerCase(),
+              );
+              const toKey = toLabel ? resolveChainKey(toLabel) : "";
+              return `
+            <div class="spread-row">
+              <div class="spread-label">
+                <div class="spread-meta-icon-stack">
+                  <div class="spread-token-disc">${tokenIcon(row.asset)}</div>
+                  <div class="spread-chain-discs">
+                    <div class="spread-chain-disc">${chainIcon(ck)}</div>
+                    ${toKey ? `<div class="spread-chain-disc">${chainIcon(toKey)}</div>` : ""}
+                  </div>
+                </div>
+                <div class="spread-meta-text">
+                  <div class="spread-asset-name">${e(row.asset)}</div>
+                  <div class="spread-chain-name">${e(row.chain).replace(/->/g, "→")}</div>
+                </div>
+              </div>
+
+              <div class="spread-bar-area">
+                <!-- grid lines at each axis tick -->
+                <div class="spread-grid-lines">
+                  ${Array.from({ length: 6 }, (_, i) => '<div class="spread-grid-line"></div>').join("")}
+                </div>
+                <div class="spread-bars">
+                  <div class="spread-bar-line">
+                    <span class="spread-proto-lbl low">${e(row.lowProto)}</span>
+                    <div class="spread-track-wrap">
+                      <span class="spread-rate-top low" style="left:${loW}px">${lo.toFixed(2)}%</span>
+                      <div class="spread-track"><div class="spread-fill low" style="width:${loW}px"></div></div>
+                    </div>
+                  </div>
+                  <div class="spread-bar-line">
+                    <span class="spread-proto-lbl high">${e(row.highProto)}</span>
+                    <div class="spread-track-wrap">
+                      <span class="spread-rate-top high" style="left:${hiW}px">${hi.toFixed(2)}%</span>
+                      <div class="spread-track"><div class="spread-fill high" style="width:${hiW}px"></div></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="spread-diff-col">
+                <div class="spread-diff-val ${row.tier === "high" ? "high" : ""}">${row.diff}</div>
+                <div class="spread-diff-lbl">spread</div>
+              </div>
+            </div>`;
+            })
+            .join("")}
+        </div>
+
+        ${
+          s.sourceText
+            ? `
+          <div class="slide-footer">
+            <div class="slide-source">${s.sourceText}</div>
+            <div class="slide-brand">Clovis</div>
+          </div>`
+            : ""
+        }
+      </div>`;
+        }
+
+        setTimeout(applyScale, 50);
+      }
+
+      /* ════════════════════════════════
+   HELPERS
+════════════════════════════════ */
+      function e(s) {
+        return String(s).replace(/"/g, "&quot;").replace(/</g, "&lt;");
+      }
+
+      function setBg(mode) {
+        const slide = document.getElementById("slide-output");
+        slide.classList.remove("bg-solid", "bg-figma", "bg-grad");
+        slide.classList.add("bg-" + mode);
+        document
+          .querySelectorAll(".btn-bg-sel")
+          .forEach((b) => b.classList.remove("active"));
+        document.getElementById("bg-" + mode).classList.add("active");
+      }
+
+      function applyScale() {
+        const scale = parseFloat(document.getElementById("scale-sel").value);
+        const slide = document.getElementById("slide-output");
+        const wrap = document.getElementById("scale-wrap");
+        slide.style.transform = `scale(${scale})`;
+        slide.style.transformOrigin = "top left";
+        wrap.style.height = slide.offsetHeight * scale + "px";
+        wrap.style.width = slide.offsetWidth * scale + "px";
+      }
+
+      function switchTpl() {
+        currentTpl = document.getElementById("tpl-sel").value;
+        renderEditor();
+        renderSlide();
+      }
+
+      function addCompRow() {
+        state.comparison.rows.push({
+          icon: "✦",
+          label: "New Category",
+          themMain: "Competitor limitation",
+          themSub: "Sub text",
+          clovisText: "Clovis advantage",
+        });
+        renderEditor();
+        renderSlide();
+      }
+      function delCompRow(i) {
+        state.comparison.rows.splice(i, 1);
+        renderEditor();
+        renderSlide();
+      }
+      function addRateRow() {
+        state.rate.rows.push({
+          asset: "USDC",
+          chain: "Ethereum",
+          chainKey: "eth",
+          lowProto: "Protocol A",
+          lowRate: "3.00%",
+          highProto: "Protocol B",
+          highRate: "5.00%",
+          diff: "1.67×",
+          tier: "mid",
+        });
+        renderEditor();
+        renderSlide();
+      }
+      function delRateRow(i) {
+        state.rate.rows.splice(i, 1);
+        renderEditor();
+        renderSlide();
+      }
+      function addSpreadRow() {
+        state.spread.rows.push({
+          asset: "USDC",
+          chain: "Ethereum",
+          chainKey: "eth",
+          lowProto: "Protocol A",
+          lowRate: "3.00",
+          highProto: "Protocol B",
+          highRate: "5.00",
+          diff: "1.67×",
+          tier: "mid",
+        });
+        renderEditor();
+        renderSlide();
+      }
+      function delSpreadRow(i) {
+        state.spread.rows.splice(i, 1);
+        renderEditor();
+        renderSlide();
+      }
+
+      function wait(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+      }
+
+      async function exportPNG() {
+        const btn = document.querySelector('button[onclick="exportPNG()"]');
+        const prevLabel = btn ? btn.textContent : "";
+        try {
+          if (btn) {
+            btn.disabled = true;
+            btn.textContent = "Exporting...";
+          }
+
+          // Force export at 1x logical size to keep output dimensions stable.
+          const scaleSel = document.getElementById("scale-sel");
+          if (scaleSel) scaleSel.value = "1";
+          applyScale();
+          await wait(60);
+
+          if (document.fonts && document.fonts.ready) {
+            await document.fonts.ready;
+          }
+
+          const slide = document.getElementById("slide-output");
+          if (!slide) throw new Error("slide-output not found");
+
+          const w = slide.offsetWidth;
+          const h = slide.offsetHeight;
+          if (!w || !h) throw new Error("invalid slide size");
+
+          const styleText = Array.from(document.querySelectorAll("style"))
+            .map((s) => s.textContent || "")
+            .join("\n");
+
+          const clone = slide.cloneNode(true);
+          clone.style.transform = "none";
+          clone.style.transformOrigin = "top left";
+          clone.style.margin = "0";
+
+          const xhtml = `
+            <div xmlns="http://www.w3.org/1999/xhtml" style="width:${w}px;height:${h}px;overflow:hidden;">
+              <style>${styleText}</style>
+              ${clone.outerHTML}
+            </div>
+          `;
+
+          const svg = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+              <foreignObject x="0" y="0" width="100%" height="100%">${xhtml}</foreignObject>
+            </svg>
+          `;
+
+          const svgBlob = new Blob([svg], {
+            type: "image/svg+xml;charset=utf-8",
+          });
+          const svgUrl = URL.createObjectURL(svgBlob);
+
+          const img = new Image();
+          await new Promise((resolve, reject) => {
+            img.onload = resolve;
+            img.onerror = reject;
+            img.src = svgUrl;
+          });
+
+          const canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) throw new Error("canvas context unavailable");
+          ctx.drawImage(img, 0, 0);
+          URL.revokeObjectURL(svgUrl);
+
+          const pngBlob = await new Promise((resolve, reject) => {
+            canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("toBlob failed"))), "image/png");
+          });
+
+          const a = document.createElement("a");
+          const fileName = `clovis-${currentTpl}-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.png`;
+          a.href = URL.createObjectURL(pngBlob);
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(a.href);
+        } catch (err) {
+          console.error("Export PNG failed:", err);
+          alert("Export PNG failed in this browser. Please try Chrome/Edge, then retry.");
+        } finally {
+          if (btn) {
+            btn.disabled = false;
+            btn.textContent = prevLabel || "⬇ Export PNG";
+          }
+        }
+      }
+
+      /* ════════════════════════════════
+   INIT
+════════════════════════════════ */
+      // set dropdown to rate template
+      document.getElementById("tpl-sel").value = "rate";
+      renderEditor();
+      renderSlide();
+      window.addEventListener("resize", applyScale);
+    </script>
+  </body>
+</html>
