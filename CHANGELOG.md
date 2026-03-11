@@ -14,6 +14,10 @@ All notable changes to this project will be documented in this file.
 - Gradient text export fix: inline SVG for reliable PNG output across browsers
 - Content area color update: blue accent from design tokens
 
+### Changed
+
+- Rate Data graphic: column spacing adjusted for even distribution
+
 ### Fixed
 
 - Export PNG gradient text displacement (template-specific vertical nudge)
