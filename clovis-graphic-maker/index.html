@@ -154,6 +154,15 @@
       .btn-ghost:hover {
         background: rgba(47, 217, 255, 0.15);
       }
+      .btn-icon {
+        padding: 6px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .btn-icon svg {
+        display: block;
+      }
 
       /* ── MAIN LAYOUT ── */
       .main {
@@ -170,6 +179,18 @@
         padding: 18px;
         overflow-y: auto;
         max-height: calc(100vh - 53px);
+        transition:
+          width 0.2s,
+          min-width 0.2s,
+          padding 0.2s,
+          border 0.2s;
+      }
+      .editor-panel.collapsed {
+        width: 0;
+        min-width: 0;
+        padding: 0;
+        overflow: hidden;
+        border-right: none;
       }
       .panel-section {
         margin-bottom: 22px;
@@ -659,6 +680,18 @@
         -webkit-text-fill-color: transparent;
         background-clip: text;
       }
+      .slide-h2.split-two-line {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0;
+      }
+      .slide-h2.split-two-line .h2-main,
+      .slide-h2.split-two-line .grad {
+        display: block;
+        white-space: normal;
+      }
 
       /* ── COMPARISON TABLE ── */
       .comp-table {
@@ -1042,6 +1075,28 @@
   <body>
     <!-- TOOLBAR -->
     <div class="tool-bar">
+      <button
+        class="btn btn-ghost btn-icon"
+        id="editor-toggle"
+        onclick="toggleEditorPanel()"
+        title="收合編輯區"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <rect width="18" height="18" x="3" y="3" rx="2" />
+          <path d="M9 3v18m7-6l-3-3l3-3" />
+        </svg>
+      </button>
+      <div class="tool-sep"></div>
       <div class="tool-logo">Clovis Maker</div>
       <div class="tool-sep"></div>
       <div class="tool-label">Template</div>
@@ -1081,10 +1136,10 @@
       <div class="tool-sep"></div>
       <div class="tool-label">Scale</div>
       <select class="tool-select" id="scale-sel" onchange="applyScale()">
-        <option value="0.5">50% (fit screen)</option>
-        <option value="0.6" selected>60%</option>
+        <option value="0.5">50%</option>
+        <option value="0.6">60%</option>
         <option value="0.75">75%</option>
-        <option value="1">100% (export)</option>
+        <option value="1" selected>100% (export)</option>
       </select>
       <div style="flex: 1"></div>
       <button class="btn btn-ghost" onclick="exportPNG()">⬇ Export PNG</button>
@@ -1217,6 +1272,7 @@
           eyebrow: "WHY CLOVIS",
           h2line1: "Most protocols solve one problem on one chain.",
           h2line2: "Clovis solves all four on every chain.",
+          headingLayout: "inline",
           themLabel: "Other Protocols",
           tag1: "Four Yield Layers",
           tag2: "Every Chain",
@@ -1255,6 +1311,7 @@
           eyebrow: "Rate Intelligence · Clovis Vision X",
           h2line1: "Same Asset,",
           h2line2: "Different Yield",
+          headingLayout: "inline",
           sourceText:
             "90-day averages ending Mar 6, 2026  ·  105 pools  ·  8 protocols  ·  8 chains\nSource: DefiLlama Yields API",
           rows: [
@@ -1319,6 +1376,7 @@
           eyebrow: "",
           h2line1: "The Cost of",
           h2line2: "Passive Lending",
+          headingLayout: "inline",
           sourceText:
             "90-day averages ending March 6, 2026 — 105 pools, 8 protocols, 8 chains (DefiLlama Yields API)",
           rows: [
@@ -1427,6 +1485,11 @@
           <input class="field-input" value="${e(s.h2line1)}" oninput="state.comparison.h2line1=this.value;renderSlide()"></div>
         <div class="field-group"><div class="field-label">Headline line 2 (gradient)</div>
           <input class="field-input" value="${e(s.h2line2)}" oninput="state.comparison.h2line2=this.value;renderSlide()"></div>
+        <div class="field-group"><div class="field-label">Title layout</div>
+          <select class="field-select" onchange="state.comparison.headingLayout=this.value;renderSlide()">
+            <option value="inline" ${(s.headingLayout || "inline") === "inline" ? "selected" : ""}>Same line (inline)</option>
+            <option value="block" ${(s.headingLayout || "inline") === "block" ? "selected" : ""}>New line (block)</option>
+          </select></div>
       </div>
       <div class="panel-section">
         <div class="panel-title">Columns</div>
@@ -1472,6 +1535,11 @@
           <input class="field-input" value="${e(s.h2line1)}" oninput="state.rate.h2line1=this.value;renderSlide()"></div>
         <div class="field-group"><div class="field-label">Title — gradient</div>
           <input class="field-input" value="${e(s.h2line2)}" oninput="state.rate.h2line2=this.value;renderSlide()"></div>
+        <div class="field-group"><div class="field-label">Title layout</div>
+          <select class="field-select" onchange="state.rate.headingLayout=this.value;renderSlide()">
+            <option value="inline" ${(s.headingLayout || "inline") === "inline" ? "selected" : ""}>Same line (inline)</option>
+            <option value="block" ${(s.headingLayout || "inline") === "block" ? "selected" : ""}>New line (block)</option>
+          </select></div>
       </div>
       <div class="panel-section">
         <div class="panel-title">Data Rows</div>
@@ -1539,6 +1607,11 @@
         <input class="field-input" value="${e(s.h2line1)}" oninput="state.spread.h2line1=this.value;renderSlide()"></div>
       <div class="field-row"><div class="field-label">Title Line 2 (accent)</div>
         <input class="field-input" value="${e(s.h2line2)}" oninput="state.spread.h2line2=this.value;renderSlide()"></div>
+      <div class="field-row"><div class="field-label">Title layout</div>
+        <select class="field-select" onchange="state.spread.headingLayout=this.value;renderSlide()">
+          <option value="inline" ${(s.headingLayout || "inline") === "inline" ? "selected" : ""}>Same line (inline)</option>
+          <option value="block" ${(s.headingLayout || "inline") === "block" ? "selected" : ""}>New line (block)</option>
+        </select></div>
       <div class="panel-title">Data Rows</div>
       ${s.rows
         .map(
@@ -1596,9 +1669,8 @@
       <div class="slide-container">
         <div class="slide-heading">
           <p class="slide-eyebrow">${s.eyebrow}</p>
-          <div class="slide-h2">
-            ${s.h2line1}
-            <span class="grad">${s.h2line2}</span>
+          <div class="slide-h2${(s.headingLayout || "inline") === "block" ? " split-two-line" : ""}">
+            ${(s.headingLayout || "inline") === "block" ? `<span class="h2-main">${s.h2line1}</span><span class="grad">${s.h2line2}</span>` : `${s.h2line1} <span class="grad">${s.h2line2}</span>`}
           </div>
         </div>
         <div class="comp-table">
@@ -1642,8 +1714,8 @@
       <div class="slide-container">
         <div class="slide-heading">
           <p class="slide-eyebrow">${s.eyebrow}</p>
-          <div class="slide-h2">
-            ${s.h2line1} <span class="grad">${s.h2line2}</span>
+          <div class="slide-h2${(s.headingLayout || "inline") === "block" ? " split-two-line" : ""}">
+            ${(s.headingLayout || "inline") === "block" ? `<span class="h2-main">${s.h2line1}</span><span class="grad">${s.h2line2}</span>` : `${s.h2line1} <span class="grad">${s.h2line2}</span>`}
           </div>
         </div>
 
@@ -1741,9 +1813,8 @@
       <div class="slide-container">
         <div class="slide-heading">
           <p class="slide-eyebrow">${s.eyebrow}</p>
-          <div class="slide-h2">
-            ${s.h2line1}
-            <span class="grad">${s.h2line2}</span>
+          <div class="slide-h2${(s.headingLayout || "inline") === "block" ? " split-two-line" : ""}">
+            ${(s.headingLayout || "inline") === "block" ? `<span class="h2-main">${s.h2line1}</span><span class="grad">${s.h2line2}</span>` : `${s.h2line1} <span class="grad">${s.h2line2}</span>`}
           </div>
         </div>
 
@@ -1931,6 +2002,20 @@
         return new Promise((resolve) => setTimeout(resolve, ms));
       }
 
+      const EDITOR_ICON_EXPANDED =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18m7-6l-3-3l3-3"/></svg>';
+      const EDITOR_ICON_COLLAPSED =
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18m5-12l3 3l-3 3"/></svg>';
+      function toggleEditorPanel() {
+        const panel = document.getElementById("editor-panel");
+        const btn = document.getElementById("editor-toggle");
+        const collapsed = panel.classList.toggle("collapsed");
+        btn.innerHTML = collapsed
+          ? EDITOR_ICON_COLLAPSED
+          : EDITOR_ICON_EXPANDED;
+        btn.title = collapsed ? "展開編輯區" : "收合編輯區";
+      }
+
       async function canvasToPngBlob(canvas) {
         if (canvas.toBlob) {
           return new Promise((resolve, reject) => {
@@ -1984,6 +2069,54 @@
         return { ascent: fontSize * 0.8, descent: fontSize * 0.2 };
       }
 
+      function getCanvasFontFromStyle(style) {
+        const fontStyle =
+          style.fontStyle && style.fontStyle !== "normal"
+            ? `${style.fontStyle} `
+            : "";
+        const fontWeight = style.fontWeight || "700";
+        const fontFamily = style.fontFamily || "sans-serif";
+        return `${fontStyle}${fontWeight} ${style.fontSize || "16px"} ${fontFamily}`;
+      }
+
+      function measureTextWidth(ctx, text, letterSpacingPx = 0) {
+        if (!text) return 0;
+        const base = ctx.measureText(text).width;
+        const extra = Math.max(0, text.length - 1) * letterSpacingPx;
+        return base + extra;
+      }
+
+      function wrapTextLines(text, maxWidth, style) {
+        const clean = (text || "").replace(/\s+/g, " ").trim();
+        if (!clean) return [""];
+        if (!maxWidth || maxWidth <= 0) return [clean];
+
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return [clean];
+
+        ctx.font = getCanvasFontFromStyle(style);
+        const letterSpacing = parseFloat(style.letterSpacing);
+        const letterSpacingPx = Number.isFinite(letterSpacing)
+          ? letterSpacing
+          : 0;
+
+        const words = clean.split(" ");
+        const lines = [];
+        let line = words[0] || "";
+        for (let i = 1; i < words.length; i++) {
+          const candidate = `${line} ${words[i]}`;
+          if (measureTextWidth(ctx, candidate, letterSpacingPx) <= maxWidth) {
+            line = candidate;
+          } else {
+            lines.push(line);
+            line = words[i];
+          }
+        }
+        lines.push(line);
+        return lines;
+      }
+
       function createInlineGradientTextSvg(
         text,
         w,
@@ -2020,19 +2153,18 @@
         defs.appendChild(grad);
         svg.appendChild(defs);
 
+        const tm = getTextMetrics(style, text);
+        const fontSize = parseFloat(style.fontSize) || 16;
+        const lineHeight = parseFloat(style.lineHeight);
+        const lineHeightPx = Number.isFinite(lineHeight)
+          ? lineHeight
+          : fontSize * 1.2;
+        const totalGlyph = tm.ascent + tm.descent;
+        const topLeading = Math.max(0, (lineHeightPx - totalGlyph) / 2);
+        const lines = wrapTextLines(text, w, style);
+
         const textEl = document.createElementNS(ns, "text");
         textEl.setAttribute("x", "0");
-        const tm = getTextMetrics(style, text);
-        const lineHeight = parseFloat(style.lineHeight);
-        const totalGlyph = tm.ascent + tm.descent;
-        const effectiveLineHeight = Number.isFinite(lineHeight)
-          ? lineHeight
-          : h;
-        const topLeading = Math.max(0, (effectiveLineHeight - totalGlyph) / 2);
-        textEl.setAttribute(
-          "y",
-          String(topLeading + tm.ascent + verticalNudgePx),
-        );
         textEl.setAttribute("xml:space", "preserve");
         textEl.setAttribute("fill", `url(#${gradientId})`);
         textEl.setAttribute("font-family", style.fontFamily || "sans-serif");
@@ -2042,7 +2174,14 @@
         if (style.letterSpacing && style.letterSpacing !== "normal") {
           textEl.setAttribute("letter-spacing", style.letterSpacing);
         }
-        textEl.textContent = text;
+        const firstY = topLeading + tm.ascent + verticalNudgePx;
+        lines.forEach((lineText, idx) => {
+          const tspan = document.createElementNS(ns, "tspan");
+          tspan.setAttribute("x", "0");
+          tspan.setAttribute("y", String(firstY + idx * lineHeightPx));
+          tspan.textContent = lineText;
+          textEl.appendChild(tspan);
+        });
         svg.appendChild(textEl);
 
         svg.style.width = `${w}px`;
@@ -2056,7 +2195,24 @@
         return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(raw)}`;
       }
 
-      function replaceGradientTextWithInlineSvg(sourceSlide, exportSlide) {
+      function getGradientTextNudgePx(srcEl, fontSize, templateKey) {
+        const nudgeMap = {
+          rate: { h2: 0.12, eyebrow: 0.08 },
+          // Spread template needs larger downward nudge due to export font baseline shift.
+          spread: { h2: 0.21, eyebrow: 0.12 },
+          comparison: { h2: 0.1, eyebrow: 0.08 },
+        };
+        const tpl = nudgeMap[templateKey] || nudgeMap.rate;
+        return srcEl.matches(".slide-h2 .grad")
+          ? Math.round(fontSize * tpl.h2)
+          : Math.round(fontSize * tpl.eyebrow);
+      }
+
+      function replaceGradientTextWithInlineSvg(
+        sourceSlide,
+        exportSlide,
+        templateKey = "rate",
+      ) {
         const sourceTargets = sourceSlide.querySelectorAll(
           ".slide-eyebrow, .slide-h2 .grad",
         );
@@ -2085,9 +2241,11 @@
           const style = getComputedStyle(srcEl);
           const gradientId = `exp-grad-${Date.now()}-${i}`;
           const fontSize = parseFloat(style.fontSize) || 16;
-          const verticalNudgePx = srcEl.matches(".slide-h2 .grad")
-            ? Math.round(fontSize * 0.12)
-            : Math.round(fontSize * 0.08);
+          const verticalNudgePx = getGradientTextNudgePx(
+            srcEl,
+            fontSize,
+            templateKey,
+          );
           const svg = createInlineGradientTextSvg(
             dstEl.textContent || "",
             w,
@@ -2223,7 +2381,7 @@
           exportSlide.style.margin = "0";
           exportSlide.style.width = `${w}px`;
           exportSlide.style.height = `${h}px`;
-          replaceGradientTextWithInlineSvg(slide, exportSlide);
+          replaceGradientTextWithInlineSvg(slide, exportSlide, currentTpl);
 
           const exportHost = document.createElement("div");
           exportHost.style.position = "fixed";
