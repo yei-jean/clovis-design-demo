@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Clovis Design Demo</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg1: #021f28;
+        --surface1: #052c36;
+        --surface2: #063e4c;
+        --primary: #2fd9ff;
+        --primary-bg: rgba(47, 217, 255, 0.12);
+        --text-pri: #f2f7f9;
+        --text-sec: #9ee1f3;
+        --text-dis: #c4d0d6;
+        --font-h: "Host Grotesk", sans-serif;
+        --font-m: "Geist Mono", monospace;
+      }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #0a1015;
+        font-family: var(--font-h);
+        color: var(--text-pri);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 28px;
+      }
+      .container {
+        max-width: 480px;
+        text-align: center;
+      }
+      .logo {
+        font-family: var(--font-m);
+        font-size: 14px;
+        letter-spacing: 0.2em;
+        color: var(--primary);
+        margin-bottom: 24px;
+      }
+      h1 {
+        font-size: 32px;
+        font-weight: 700;
+        line-height: 1.2;
+        margin-bottom: 16px;
+        color: var(--text-pri);
+      }
+      .desc {
+        font-size: 15px;
+        color: var(--text-dis);
+        line-height: 1.6;
+        margin-bottom: 40px;
+      }
+      .card {
+        display: block;
+        background: var(--surface1);
+        border: 1px solid rgba(47, 217, 255, 0.2);
+        border-radius: 12px;
+        padding: 24px 32px;
+        text-decoration: none;
+        color: var(--text-pri);
+        transition: all 0.2s;
+      }
+      .card:hover {
+        background: var(--surface2);
+        border-color: rgba(47, 217, 255, 0.4);
+        color: var(--primary);
+      }
+      .card-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      .card-meta {
+        font-family: var(--font-m);
+        font-size: 12px;
+        color: var(--text-sec);
+        opacity: 0.8;
+      }
+      .copyright {
+        margin-top: 40px;
+        font-size: 12px;
+        color: var(--text-dis);
+        opacity: 0.6;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <!-- <div class="logo">CLOVIS</div> -->
+      <h1>🎨 Design Tools</h1>
+      <p class="desc">
+        Chart and visualization tools for creating Clovis-branded assets.
+      </p>
+      <a href="clovis-graphic-maker/" class="card">
+        <div class="card-title">Graphic Maker</div>
+
+        <div class="card-meta">Rate / Spread charts · Export PNG</div>
+      </a>
+      <p class="copyright">© Jean</p>
+    </div>
+  </body>
+</html>
