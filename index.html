@@ -87,6 +87,28 @@
         color: var(--text-sec);
         opacity: 0.8;
       }
+      .updates {
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid rgba(47, 217, 255, 0.12);
+        text-align: left;
+      }
+      .updates-title {
+        font-family: var(--font-m);
+        font-size: 11px;
+        letter-spacing: 0.12em;
+        color: var(--text-sec);
+        margin-bottom: 12px;
+      }
+      .updates-list {
+        font-size: 13px;
+        color: var(--text-dis);
+        line-height: 1.7;
+      }
+      .updates-list a {
+        color: var(--primary);
+        opacity: 0.9;
+      }
       .copyright {
         margin-top: 40px;
         font-size: 12px;
@@ -104,9 +126,16 @@
       </p>
       <a href="clovis-graphic-maker/" class="card">
         <div class="card-title">Graphic Maker</div>
-
         <div class="card-meta">Rate / Spread charts · Export PNG</div>
       </a>
+      <div class="updates">
+        <div class="updates-title">UPDATES</div>
+        <ul class="updates-list">
+          <li>Export scale (1x–3x), collapsible editor, editable table headers</li>
+          <li>Gradient text export fix, title layout option (inline/block)</li>
+          <li><a href="changelog.html">Full changelog</a></li>
+        </ul>
+      </div>
       <p class="copyright">© Jean</p>
     </div>
   </body>
