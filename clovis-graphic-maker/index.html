@@ -545,7 +545,7 @@
         transition: width 0.3s;
       }
       .spread-fill.low {
-        background: rgba(52, 168, 194, 0.82);
+        background: #4b6570;
       }
       .spread-fill.high {
         background: linear-gradient(
@@ -1497,13 +1497,13 @@
               </div>
             </div>
             <div class="row-grid2">
-              <div class="field-group"><div class="field-label">Low Protocol</div>
+              <div class="field-group"><div class="field-label">Low Rate</div>
                 <input class="field-input" value="${e(row.lowProto)}" oninput="state.rate.rows[${i}].lowProto=this.value;renderSlide()"></div>
               <div class="field-group"><div class="field-label">Low Rate</div>
                 <input class="field-input" value="${e(row.lowRate)}" oninput="state.rate.rows[${i}].lowRate=this.value;renderSlide()"></div>
             </div>
             <div class="row-grid2">
-              <div class="field-group"><div class="field-label">High Protocol</div>
+              <div class="field-group"><div class="field-label">High Rate</div>
                 <input class="field-input" value="${e(row.highProto)}" oninput="state.rate.rows[${i}].highProto=this.value;renderSlide()"></div>
               <div class="field-group"><div class="field-label">High Rate</div>
                 <input class="field-input" value="${e(row.highRate)}" oninput="state.rate.rows[${i}].highRate=this.value;renderSlide()"></div>
@@ -1557,13 +1557,13 @@
               </select></div>
           </div>
           <div class="row-grid2">
-            <div><div class="field-label">Low Protocol</div>
+            <div><div class="field-label">Low Rate</div>
               <input class="field-input" value="${e(row.lowProto)}" oninput="state.spread.rows[${i}].lowProto=this.value;renderSlide()"></div>
             <div><div class="field-label">Low Rate %</div>
               <input class="field-input" value="${e(row.lowRate)}" oninput="state.spread.rows[${i}].lowRate=this.value;renderSlide()"></div>
           </div>
           <div class="row-grid2">
-            <div><div class="field-label">High Protocol</div>
+            <div><div class="field-label">High Rate</div>
               <input class="field-input" value="${e(row.highProto)}" oninput="state.spread.rows[${i}].highProto=this.value;renderSlide()"></div>
             <div><div class="field-label">High Rate %</div>
               <input class="field-input" value="${e(row.highRate)}" oninput="state.spread.rows[${i}].highRate=this.value;renderSlide()"></div>
@@ -1651,8 +1651,8 @@
           <div class="rate-col-headers">
             <div class="rch">Asset</div>
             <div class="rch">Chain</div>
-            <div class="rch">↓&nbsp;&nbsp;Low Protocol</div>
-            <div class="rch">↑&nbsp;&nbsp;High Protocol</div>
+            <div class="rch">↓&nbsp;&nbsp;Low Rate</div>
+            <div class="rch">↑&nbsp;&nbsp;High Rate</div>
             <div class="rch right">Rate Differential</div>
           </div>
           ${s.rows
