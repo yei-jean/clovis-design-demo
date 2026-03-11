@@ -336,7 +336,7 @@
         width: 1296px;
         transform-origin: top center;
         background: var(--bg1);
-        padding: 80px 80px 72px;
+        padding: 64px 72px 72px 72px;
         position: relative;
         overflow: hidden;
       }
@@ -406,7 +406,7 @@
       .spread-axis-labels {
         display: flex;
         justify-content: space-between;
-        padding: 0 2px;
+        padding: 0 2px 0 128px;
       }
       .spread-axis-lbl {
         font-family: var(--font-m);
@@ -880,7 +880,7 @@
         display: grid;
         grid-template-columns: 160px 200px 1fr 1fr 128px;
         align-items: center;
-        border-bottom: 1px solid rgba(47, 217, 255, 0.07);
+        border-bottom: 1px solid rgba(47, 217, 255, 0.12);
         min-height: 76px;
         padding: 0 4px;
         border-radius: 5px;
@@ -1318,6 +1318,11 @@
           h2line1: "Same Asset,",
           h2line2: "Different Yield",
           headingLayout: "inline",
+          colAsset: "Asset",
+          colChain: "Chain",
+          colLowRate: "↓  Low Rate",
+          colHighRate: "↑  High Rate",
+          colDiff: "Rate Differential",
           sourceText:
             "90-day averages ending Mar 6, 2026  ·  105 pools  ·  8 protocols  ·  8 chains\nSource: DefiLlama Yields API",
           rows: [
@@ -1548,6 +1553,23 @@
           </select></div>
       </div>
       <div class="panel-section">
+        <div class="panel-title">Table Headers</div>
+        <div class="row-grid2">
+          <div class="field-group"><div class="field-label">Col 1</div>
+            <input class="field-input" value="${e(s.colAsset || "Asset")}" oninput="state.rate.colAsset=this.value;renderSlide()" placeholder="Asset"></div>
+          <div class="field-group"><div class="field-label">Col 2</div>
+            <input class="field-input" value="${e(s.colChain || "Chain")}" oninput="state.rate.colChain=this.value;renderSlide()" placeholder="Chain"></div>
+        </div>
+        <div class="row-grid2">
+          <div class="field-group"><div class="field-label">Col 3</div>
+            <input class="field-input" value="${e(s.colLowRate || "↓  Low Rate")}" oninput="state.rate.colLowRate=this.value;renderSlide()" placeholder="↓  Low Rate"></div>
+          <div class="field-group"><div class="field-label">Col 4</div>
+            <input class="field-input" value="${e(s.colHighRate || "↑  High Rate")}" oninput="state.rate.colHighRate=this.value;renderSlide()" placeholder="↑  High Rate"></div>
+        </div>
+        <div class="field-group"><div class="field-label">Col 5</div>
+          <input class="field-input" value="${e(s.colDiff || "Rate Differential")}" oninput="state.rate.colDiff=this.value;renderSlide()" placeholder="Rate Differential"></div>
+      </div>
+      <div class="panel-section">
         <div class="panel-title">Data Rows</div>
         ${s.rows
           .map(
@@ -1727,11 +1749,11 @@
 
         <div class="rate-wrap">
           <div class="rate-col-headers">
-            <div class="rch">Asset</div>
-            <div class="rch">Chain</div>
-            <div class="rch">↓&nbsp;&nbsp;Low Rate</div>
-            <div class="rch">↑&nbsp;&nbsp;High Rate</div>
-            <div class="rch right">Rate Differential</div>
+            <div class="rch">${s.colAsset || "Asset"}</div>
+            <div class="rch">${s.colChain || "Chain"}</div>
+            <div class="rch">${s.colLowRate || "↓  Low Rate"}</div>
+            <div class="rch">${s.colHighRate || "↑  High Rate"}</div>
+            <div class="rch right">${s.colDiff || "Rate Differential"}</div>
           </div>
           ${s.rows
             .map((row) => {
@@ -2401,11 +2423,18 @@
           document.body.appendChild(exportHost);
           await waitForImageAssets(exportSlide);
 
-          const exportScale = parseFloat(document.getElementById("export-scale-sel")?.value || "2");
+          const exportScale = parseFloat(
+            document.getElementById("export-scale-sel")?.value || "2",
+          );
           let pngBlob;
           try {
             // Prefer html2canvas first to preserve browser-rendered text effects.
-            pngBlob = await exportViaHtml2Canvas(exportSlide, w, h, exportScale);
+            pngBlob = await exportViaHtml2Canvas(
+              exportSlide,
+              w,
+              h,
+              exportScale,
+            );
           } catch (primaryErr) {
             console.warn(
               "Primary PNG export failed, trying SVG fallback:",
