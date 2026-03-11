@@ -154,6 +154,19 @@
       .btn-ghost:hover {
         background: rgba(47, 217, 255, 0.15);
       }
+      .btn-link {
+        background: transparent;
+        border: none;
+        color: var(--text-dis);
+        font-size: 12px;
+        font-weight: 500;
+        opacity: 0.65;
+        text-decoration: none;
+      }
+      .btn-link:hover {
+        color: var(--text-sec);
+        opacity: 0.9;
+      }
       .btn-icon {
         padding: 6px;
         display: inline-flex;
@@ -1142,16 +1155,18 @@
         <option value="1" selected>100% (export)</option>
       </select>
       <div style="flex: 1"></div>
+      <a href="../changelog.html" class="btn btn-link" title="Changelog"
+        >Changelog</a
+      >
       <select class="tool-select" id="export-scale-sel" title="匯出解析度倍數">
         <option value="1">1x</option>
         <option value="1.5">1.5x</option>
         <option value="2" selected>2x</option>
         <option value="3">3x</option>
       </select>
-      <button class="btn btn-ghost" onclick="exportPNG()">⬇ Export PNG</button>
-      <!-- <a href="../changelog.html" class="btn btn-ghost" title="Changelog"
-        >Updates</a
-      > -->
+      <button class="btn btn-primary" onclick="exportPNG()">
+        ⬇ Export PNG
+      </button>
     </div>
 
     <!-- MAIN -->
