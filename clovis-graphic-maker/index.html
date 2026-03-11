@@ -1142,6 +1142,12 @@
         <option value="1" selected>100% (export)</option>
       </select>
       <div style="flex: 1"></div>
+      <select class="tool-select" id="export-scale-sel" title="匯出解析度倍數">
+        <option value="1">1x</option>
+        <option value="1.5">1.5x</option>
+        <option value="2" selected>2x</option>
+        <option value="3">3x</option>
+      </select>
       <button class="btn btn-ghost" onclick="exportPNG()">⬇ Export PNG</button>
     </div>
 
@@ -2336,11 +2342,11 @@
         }
       }
 
-      async function exportViaHtml2Canvas(exportSlide, w, h) {
+      async function exportViaHtml2Canvas(exportSlide, w, h, scale = 2) {
         await loadHtml2Canvas();
         const canvas = await window.html2canvas(exportSlide, {
           backgroundColor: null,
-          scale: 1,
+          scale: scale,
           useCORS: true,
           logging: false,
           width: w,
@@ -2395,10 +2401,11 @@
           document.body.appendChild(exportHost);
           await waitForImageAssets(exportSlide);
 
+          const exportScale = parseFloat(document.getElementById("export-scale-sel")?.value || "2");
           let pngBlob;
           try {
             // Prefer html2canvas first to preserve browser-rendered text effects.
-            pngBlob = await exportViaHtml2Canvas(exportSlide, w, h);
+            pngBlob = await exportViaHtml2Canvas(exportSlide, w, h, exportScale);
           } catch (primaryErr) {
             console.warn(
               "Primary PNG export failed, trying SVG fallback:",
