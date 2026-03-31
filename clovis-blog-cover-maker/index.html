@@ -1,0 +1,591 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clovis Blog Cover Maker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Host+Grotesk:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary:#2fd9ff; --primary-bg:rgba(47,217,255,.10);
+      --text-pri:#f2f7f9; --text-sec:#9ee1f3; --text-dis:#6b8a96;
+      --font-h:'Host Grotesk',sans-serif; --font-m:'Geist Mono',monospace;
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:#0a1015;font-family:var(--font-h);color:var(--text-pri);min-height:100vh;display:flex;flex-direction:column;}
+
+    /* TOOLBAR */
+    .toolbar{background:#0d1820;border-bottom:1px solid rgba(47,217,255,.12);padding:10px 20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;position:sticky;top:0;z-index:100;}
+    .tool-logo{font-family:var(--font-m);font-size:12px;font-weight:600;color:var(--primary);letter-spacing:.18em;text-transform:uppercase;white-space:nowrap;}
+    .tool-sep{width:1px;height:24px;background:rgba(255,255,255,.09);flex-shrink:0;}
+    .tool-label{font-size:10px;font-family:var(--font-m);color:var(--text-dis);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;}
+    select.ctrl{background:rgba(47,217,255,.06);border:1px solid rgba(47,217,255,.18);border-radius:7px;color:var(--text-pri);font-family:var(--font-h);font-size:13px;padding:5px 10px;outline:none;cursor:pointer;}
+    select.ctrl option{background:#0d1820;}
+    .btn{padding:6px 15px;border-radius:7px;font-family:var(--font-h);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;white-space:nowrap;}
+    .btn-primary{background:var(--primary);color:#021f28;}
+    .btn-primary:hover{background:#56e6ff;}
+    .btn-ghost{background:rgba(47,217,255,.08);border:1px solid rgba(47,217,255,.22);color:var(--primary);}
+    .btn-ghost:hover{background:rgba(47,217,255,.14);}
+    .spacer{flex:1;}
+
+    .main{display:flex;flex:1;}
+
+    /* EDITOR */
+    .editor{width:296px;min-width:296px;background:#0d1820;border-right:1px solid rgba(47,217,255,.1);padding:18px 14px;overflow-y:auto;max-height:calc(100vh - 49px);}
+    .sec-title{font-family:var(--font-m);font-size:9px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:rgba(47,217,255,.5);margin-bottom:9px;padding-bottom:6px;border-bottom:1px solid rgba(47,217,255,.08);}
+    .sec{margin-bottom:20px;}
+    .field{margin-bottom:9px;}
+    .field-label{font-size:10px;color:var(--text-dis);margin-bottom:3px;font-family:var(--font-m);letter-spacing:.04em;display:flex;justify-content:space-between;align-items:center;}
+    .field-label span{color:var(--primary);}
+    textarea,input[type=text]{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);border-radius:6px;color:var(--text-pri);font-family:var(--font-h);font-size:13px;padding:7px 9px;outline:none;transition:border-color .15s;resize:none;}
+    textarea:focus,input[type=text]:focus{border-color:rgba(47,217,255,.4);}
+
+    /* Range slider */
+    input[type=range]{width:100%;-webkit-appearance:none;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--primary) 0%,rgba(47,217,255,.15) 0%);outline:none;border:none;padding:0;display:block;margin-top:4px;}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;border-radius:50%;background:var(--primary);cursor:pointer;}
+
+    /* Size buttons */
+    .size-btns{display:flex;gap:6px;}
+    .size-btn{flex:1;padding:7px;border-radius:7px;border:1px solid rgba(47,217,255,.18);background:rgba(47,217,255,.04);color:var(--text-sec);font-family:var(--font-m);font-size:10px;cursor:pointer;text-align:center;transition:all .15s;line-height:1.4;}
+    .size-btn:hover{border-color:rgba(47,217,255,.4);}
+    .size-btn.active{border-color:rgba(47,217,255,.6);background:rgba(47,217,255,.12);color:var(--primary);}
+
+    /* Color swatches */
+    .color-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+    .color-dot{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;flex-shrink:0;}
+    .color-dot.active{border-color:white;box-shadow:0 0 0 1px rgba(255,255,255,.4);}
+    input[type=color]{width:22px;height:22px;padding:0;border:2px solid rgba(255,255,255,.2);border-radius:50%;cursor:pointer;background:transparent;flex-shrink:0;}
+
+    /* Toggle buttons (shared) */
+    .btn-row{display:flex;gap:4px;}
+    .tog{flex:1;padding:6px 4px;border-radius:5px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);color:var(--text-dis);font-size:12px;cursor:pointer;transition:all .15s;text-align:center;font-family:var(--font-h);}
+    .tog:hover{border-color:rgba(47,217,255,.3);color:var(--text-sec);}
+    .tog.active{border-color:rgba(47,217,255,.5);background:rgba(47,217,255,.1);color:var(--primary);}
+    .tog.sm-text{font-size:11px;}
+
+    /* Preset + slider combo */
+    .preset-slider{display:flex;flex-direction:column;gap:6px;}
+    .preset-row{display:flex;gap:4px;}
+    .preset-btn{flex:1;padding:5px 2px;border-radius:5px;border:1px solid rgba(255,255,255,.09);background:rgba(255,255,255,.03);color:var(--text-dis);font-size:11px;cursor:pointer;transition:all .15s;text-align:center;font-family:var(--font-m);}
+    .preset-btn:hover{border-color:rgba(47,217,255,.3);color:var(--text-sec);}
+    .preset-btn.active{border-color:rgba(47,217,255,.5);background:rgba(47,217,255,.1);color:var(--primary);}
+
+    /* Vert pos with default button */
+    .vert-row{display:flex;align-items:center;gap:6px;}
+    .vert-row input[type=range]{flex:1;}
+    .default-btn{padding:3px 8px;border-radius:4px;border:1px solid rgba(47,217,255,.25);background:transparent;color:rgba(47,217,255,.6);font-family:var(--font-m);font-size:9px;cursor:pointer;white-space:nowrap;transition:all .15s;letter-spacing:.05em;}
+    .default-btn:hover{border-color:rgba(47,217,255,.5);color:var(--primary);}
+
+    /* PREVIEW */
+    .preview{flex:1;background:#111a20;display:flex;flex-direction:column;align-items:center;padding:28px;overflow:auto;}
+    .preview-label{font-family:var(--font-m);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.15);margin-bottom:16px;align-self:flex-start;}
+    #scale-wrap{position:relative;}
+
+    /* COVER */
+    #cover{position:relative;overflow:hidden;transform-origin:top left;font-family:'Host Grotesk',sans-serif;}
+    #cover-bg{position:absolute;inset:0;width:100%;height:100%;}
+    #cover-bg svg{width:100%;height:100%;}
+    #cover-tint{position:absolute;inset:0;pointer-events:none;}
+    #cover-logo{position:absolute;}
+    #cover-logo img,#cover-logo svg{display:block;}
+    #cover-text{position:absolute;}
+    #cover-title{font-weight:700;white-space:pre-wrap;word-break:break-word;letter-spacing:-0.01em;}
+  </style>
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="tool-logo">Blog Cover Maker</div>
+  <div class="tool-sep"></div>
+  <div class="tool-label">Scale</div>
+  <select class="ctrl" id="scale-sel" onchange="applyScale()">
+    <option value="0.4">40%</option>
+    <option value="0.5">50%</option>
+    <option value="0.6" selected>60%</option>
+    <option value="0.75">75%</option>
+    <option value="1">100%</option>
+  </select>
+  <div class="tool-sep"></div>
+  <div class="tool-label">Export</div>
+  <select class="ctrl" id="export-dpr">
+    <option value="1">1×</option>
+    <option value="1.5">1.5×</option>
+    <option value="2" selected>2×</option>
+    <option value="3">3×</option>
+  </select>
+  <div class="spacer"></div>
+  <button class="btn btn-ghost" onclick="copyPNG()">⎘ Copy PNG</button>
+  <button class="btn btn-primary" onclick="exportPNG()">⬇ Export PNG</button>
+</div>
+
+<div class="main">
+<div class="editor">
+
+  <!-- SIZE -->
+  <div class="sec">
+    <div class="sec-title">Canvas Size</div>
+    <div class="size-btns">
+      <div class="size-btn active" onclick="setSize(1200,675,this)">
+        1200×675<br><span style="opacity:.55;font-size:9px">Website Blog</span>
+      </div>
+      <div class="size-btn" onclick="setSize(1200,480,this)">
+        1200×480<br><span style="opacity:.55;font-size:9px">Twitter / Social</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BACKGROUND TINT -->
+  <div class="sec">
+    <div class="sec-title">Background Tint</div>
+    <div class="field">
+      <div class="color-row" id="tint-swatches">
+        <div class="color-dot active" style="background:#01212e;outline:1px dashed rgba(255,255,255,.3);outline-offset:2px;" onclick="setTint(null,this)" title="No tint (original)"></div>
+        <div class="color-dot" style="background:#010d14;" onclick="setTint({c:'#010d14',o:.35},this)" title="Deep Blue"></div>
+        <div class="color-dot" style="background:#060d1e;" onclick="setTint({c:'#060d1e',o:.4},this)" title="Navy"></div>
+        <div class="color-dot" style="background:#0c0f10;" onclick="setTint({c:'#0c0f10',o:.45},this)" title="Charcoal"></div>
+        <div class="color-dot" style="background:#011a22;" onclick="setTint({c:'#011a22',o:.28},this)" title="Dark Teal"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TITLE TEXT -->
+  <div class="sec">
+    <div class="sec-title">Title Text</div>
+    <div class="field">
+      <div class="field-label">Title</div>
+      <textarea id="title-input" rows="4" placeholder="Enter blog post title…" oninput="S.title=this.value;render()"></textarea>
+    </div>
+
+    <!-- Font Size -->
+    <div class="field">
+      <div class="field-label">Font Size <span id="fs-val">96px</span></div>
+      <div class="preset-slider">
+        <div class="preset-row">
+          <div class="preset-btn" onclick="setFontPreset('small',this)">Small<br><span style="opacity:.6">72px</span></div>
+          <div class="preset-btn active" onclick="setFontPreset('default',this)">Default<br><span style="opacity:.6">96px</span></div>
+          <div class="preset-btn" onclick="setFontPreset('large',this)">Large<br><span style="opacity:.6">112px</span></div>
+          <div class="preset-btn" id="fs-custom-btn" onclick="setFontPreset('custom',this)">Custom</div>
+        </div>
+        <input type="range" id="fs-slider" min="28" max="128" value="96" oninput="onFsSlider(this.value)" />
+      </div>
+    </div>
+
+    <!-- Line Height -->
+    <div class="field">
+      <div class="field-label">Line Height <span id="lh-val">1.10</span></div>
+      <div class="preset-slider">
+        <div class="preset-row">
+          <div class="preset-btn" onclick="setLhPreset('tight',this)">Tight<br><span style="opacity:.6">1.00</span></div>
+          <div class="preset-btn active" onclick="setLhPreset('default',this)">Default<br><span style="opacity:.6">1.10</span></div>
+          <div class="preset-btn" onclick="setLhPreset('loose',this)">Loose<br><span style="opacity:.6">1.25</span></div>
+          <div class="preset-btn" id="lh-custom-btn" onclick="setLhPreset('custom',this)">Custom</div>
+        </div>
+        <input type="range" id="lh-slider" min="80" max="160" value="110" oninput="onLhSlider(this.value)" />
+      </div>
+    </div>
+
+    <!-- Text Color -->
+    <div class="field">
+      <div class="field-label">Text Color</div>
+      <div class="color-row" id="text-color-swatches">
+        <div class="color-dot active" style="background:#ebffff;" onclick="setColor('#ebffff',this)"></div>
+        <div class="color-dot" style="background:#ffffff;" onclick="setColor('#ffffff',this)"></div>
+        <div class="color-dot" style="background:#2fd9ff;" onclick="setColor('#2fd9ff',this)"></div>
+        <div class="color-dot" style="background:#00e3b2;" onclick="setColor('#00e3b2',this)"></div>
+        <input type="color" id="custom-color" value="#ebffff" oninput="setColor(this.value,null)" title="Custom" />
+      </div>
+    </div>
+
+    <!-- Alignment -->
+    <div class="field">
+      <div class="field-label">Alignment</div>
+      <div class="btn-row">
+        <div class="tog active" onclick="setAlign('left',this)">← Left</div>
+        <div class="tog" onclick="setAlign('center',this)">Center</div>
+        <div class="tog" onclick="setAlign('right',this)">Right →</div>
+      </div>
+    </div>
+
+    <!-- Vertical Position -->
+    <div class="field">
+      <div class="field-label">Vertical Position <span id="vp-val">bottom</span></div>
+      <div class="vert-row">
+        <span style="font-size:10px;color:var(--text-dis)">↑</span>
+        <input type="range" id="vp-slider" min="0" max="100" value="87" oninput="onVpSlider(this.value)" />
+        <span style="font-size:10px;color:var(--text-dis)">↓</span>
+        <button class="default-btn" onclick="resetVertPos()">Default</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGO -->
+  <div class="sec">
+    <div class="sec-title">Logo</div>
+    <div class="btn-row">
+      <div class="tog active" id="logo-show" onclick="setLogo(true,this)">✓ Show</div>
+      <div class="tog" id="logo-hide" onclick="setLogo(false,this)">✕ Hide</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="preview">
+  <div class="preview-label" id="preview-label">Preview — 1200 × 675 px</div>
+  <div id="scale-wrap">
+    <div id="cover">
+      <div id="cover-bg"></div>
+      <div id="cover-tint"></div>
+      <div id="cover-logo"></div>
+      <div id="cover-text"><div id="cover-title"></div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+/* Asset paths relative to this page */
+const ASSET_LOGO = '../image/clovis-Logo.svg';
+const ASSET_BG = '../image/BlogCover-Background.svg';
+let bgSvg675 = null;
+let bgSvg480 = null;
+
+async function loadBackgroundSvgs() {
+  const res = await fetch(ASSET_BG);
+  if (!res.ok) throw new Error(res.statusText + ' ' + ASSET_BG);
+  const t = await res.text();
+  bgSvg675 = t;
+  bgSvg480 = t.replace(
+    'width="1200" height="675" viewBox="0 0 1200 675"',
+    'width="1200" height="480" viewBox="0 97.5 1200 480"'
+  );
+}
+
+function mountCoverBackground(svgString) {
+  const bgDiv = document.getElementById('cover-bg');
+  bgDiv.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;';
+  bgDiv.replaceChildren();
+  if (!svgString) return;
+  const parsed = new DOMParser().parseFromString(svgString, 'image/svg+xml');
+  const root = parsed.documentElement;
+  if (root.querySelector('parsererror')) return;
+  const svg = document.importNode(root, true);
+  svg.style.width = '100%';
+  svg.style.height = '100%';
+  svg.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+  bgDiv.appendChild(svg);
+}
+
+/* ══════ DEFAULTS ══════ */
+const COVER_PAD_X = 60; // 與標題區塊左／右 inset 一致（設計寬 1200px）
+const LOGO_TOP_PX = 64.62; // 距畫布頂（以 H=675 為基準，其它高度等比）
+const LOGO_W_REF = 225.32;
+const LOGO_H_REF = 66.13;
+
+const DEFAULTS = {
+  vertPos: 87,   // % from top for 675
+  vertPos480: 82,
+  fontSize: 96,
+  lineHeight: 1.10,
+};
+
+/* ══════ STATE ══════ */
+const S = {
+  W:1200, H:675,
+  title: "DeFi Doesn't Have a Liquidity Problem.\nIt Has Four Hundred of Them.",
+  fontSize: DEFAULTS.fontSize,
+  lineHeight: DEFAULTS.lineHeight,
+  color: '#ebffff',
+  align: 'left',
+  vertPos: DEFAULTS.vertPos,
+  tint: null,          // null = no tint, or {c:'#hex', o:0.3}
+  logoVisible: true,
+};
+
+/* ══════ RENDER ══════ */
+function render() {
+  const cover = document.getElementById('cover');
+  cover.style.width  = S.W + 'px';
+  cover.style.height = S.H + 'px';
+
+  // Background (SVG from ../image/BlogCover-Background.svg)
+  mountCoverBackground(S.H === 675 ? bgSvg675 : bgSvg480);
+
+  // Tint overlay
+  const tintEl = document.getElementById('cover-tint');
+  if (S.tint) {
+    tintEl.style.cssText = `position:absolute;inset:0;background:${S.tint.c};opacity:${S.tint.o};pointer-events:none;`;
+  } else {
+    tintEl.style.cssText = 'position:absolute;inset:0;opacity:0;pointer-events:none;';
+  }
+
+  // Logo — 左緣與標題區塊對齊；頂緣距離畫布頂 64.62px（H=675 時）
+  const logoEl = document.getElementById('cover-logo');
+  const hScale = S.H / 675;
+  const wScale = S.W / 1200;
+  const insetX = COVER_PAD_X * wScale;
+  const logoTop = LOGO_TOP_PX * hScale;
+  const logoLeft = insetX;
+  const logoW = LOGO_W_REF * hScale;
+  const logoH = LOGO_H_REF * hScale;
+
+  if (S.logoVisible) {
+    logoEl.style.cssText = `position:absolute;top:${logoTop}px;left:${logoLeft}px;display:block;line-height:0;`;
+    logoEl.replaceChildren();
+    const img = document.createElement('img');
+    img.src = ASSET_LOGO;
+    img.alt = '';
+    img.width = logoW;
+    img.height = logoH;
+    img.style.width = logoW + 'px';
+    img.style.height = logoH + 'px';
+    img.style.display = 'block';
+    logoEl.appendChild(img);
+  } else {
+    logoEl.style.display = 'none';
+    logoEl.replaceChildren();
+  }
+
+  // Text — anchored so bottom of text block is at vertPos% from top
+  const topPx = Math.round((S.vertPos / 100) * S.H);
+  const textEl = document.getElementById('cover-text');
+  textEl.style.cssText = `position:absolute;left:${insetX}px;right:${insetX}px;top:${topPx}px;transform:translateY(-100%);text-align:${S.align};`;
+  const titleEl = document.getElementById('cover-title');
+  titleEl.style.cssText = `
+    font-family:'Host Grotesk',sans-serif;
+    font-size:${S.fontSize}px;
+    font-weight:700;
+    line-height:${S.lineHeight};
+    color:${S.color};
+    white-space:pre-wrap;
+    word-break:break-word;
+    letter-spacing:-0.01em;
+  `;
+  titleEl.textContent = S.title;
+
+  const pl = document.getElementById('preview-label');
+  pl.textContent = bgSvg675
+    ? `Preview — ${S.W} × ${S.H} px`
+    : `Loading background…`;
+  applyScale();
+}
+
+function applyScale() {
+  const scale = parseFloat(document.getElementById('scale-sel').value);
+  const cover = document.getElementById('cover');
+  const wrap  = document.getElementById('scale-wrap');
+  cover.style.transform = `scale(${scale})`;
+  cover.style.transformOrigin = 'top left';
+  wrap.style.width  = (S.W * scale) + 'px';
+  wrap.style.height = (S.H * scale) + 'px';
+}
+
+/* ══════ CONTROLS ══════ */
+function setSize(w, h, btn) {
+  S.W = w; S.H = h;
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  // Restore appropriate default vertical position for this size
+  S.vertPos = h === 675 ? DEFAULTS.vertPos : DEFAULTS.vertPos480;
+  const vp = document.getElementById('vp-slider');
+  vp.value = S.vertPos;
+  updateSlider(vp);
+  updateVpLabel(S.vertPos);
+  render();
+}
+
+// Font size presets
+function setFontPreset(preset, btn) {
+  const map = { small:72, default:96, large:112 };
+  document.querySelectorAll('.preset-row').forEach(row => {
+    if(row.contains(btn)) row.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
+  });
+  btn.classList.add('active');
+  if (preset !== 'custom') {
+    S.fontSize = map[preset];
+    const sl = document.getElementById('fs-slider');
+    sl.value = S.fontSize;
+    updateSlider(sl);
+    document.getElementById('fs-val').textContent = S.fontSize + 'px';
+    render();
+  }
+  // custom: just enables slider, user drags
+}
+
+function onFsSlider(v) {
+  S.fontSize = parseInt(v);
+  document.getElementById('fs-val').textContent = v + 'px';
+  updateSlider(document.getElementById('fs-slider'));
+  // Mark as custom
+  document.querySelectorAll('#fs-slider').forEach(sl => {
+    sl.closest('.preset-slider').querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
+    sl.closest('.preset-slider').querySelector('#fs-custom-btn').classList.add('active');
+  });
+  render();
+}
+
+// Line height presets
+function setLhPreset(preset, btn) {
+  const map = { tight:1.00, default:1.10, loose:1.25 };
+  document.querySelectorAll('.preset-row').forEach(row => {
+    if(row.contains(btn)) row.querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
+  });
+  btn.classList.add('active');
+  if (preset !== 'custom') {
+    S.lineHeight = map[preset];
+    const sl = document.getElementById('lh-slider');
+    sl.value = Math.round(S.lineHeight * 100);
+    updateSlider(sl);
+    document.getElementById('lh-val').textContent = S.lineHeight.toFixed(2);
+    render();
+  }
+}
+
+function onLhSlider(v) {
+  S.lineHeight = parseFloat((parseInt(v)/100).toFixed(2));
+  document.getElementById('lh-val').textContent = S.lineHeight.toFixed(2);
+  updateSlider(document.getElementById('lh-slider'));
+  document.querySelectorAll('#lh-slider').forEach(sl => {
+    sl.closest('.preset-slider').querySelectorAll('.preset-btn').forEach(b=>b.classList.remove('active'));
+    sl.closest('.preset-slider').querySelector('#lh-custom-btn').classList.add('active');
+  });
+  render();
+}
+
+// Text color
+function setColor(hex, dot) {
+  S.color = hex;
+  const row = document.getElementById('text-color-swatches');
+  if (row) row.querySelectorAll('.color-dot').forEach((d) => d.classList.remove('active'));
+  if (dot) dot.classList.add('active');
+  document.getElementById('custom-color').value = hex;
+  render();
+}
+
+// Alignment
+function setAlign(a, btn) {
+  S.align = a;
+  btn.parentElement.querySelectorAll('.tog').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  render();
+}
+
+// Vertical position
+function onVpSlider(v) {
+  S.vertPos = parseInt(v);
+  updateVpLabel(S.vertPos);
+  updateSlider(document.getElementById('vp-slider'));
+  render();
+}
+
+function updateVpLabel(v) {
+  const labels = ['top','upper','middle','lower','bottom'];
+  const idx = Math.min(4, Math.floor(v / 21));
+  document.getElementById('vp-val').textContent = labels[idx];
+}
+
+function resetVertPos() {
+  S.vertPos = S.H === 675 ? DEFAULTS.vertPos : DEFAULTS.vertPos480;
+  const sl = document.getElementById('vp-slider');
+  sl.value = S.vertPos;
+  updateSlider(sl);
+  updateVpLabel(S.vertPos);
+  render();
+}
+
+// Tint
+function setTint(tint, dot) {
+  S.tint = tint;
+  document.getElementById('tint-swatches').querySelectorAll('.color-dot').forEach(d=>d.classList.remove('active'));
+  dot.classList.add('active');
+  render();
+}
+
+// Logo
+function setLogo(v, btn) {
+  S.logoVisible = v;
+  document.getElementById('logo-show').classList.toggle('active', v);
+  document.getElementById('logo-hide').classList.toggle('active', !v);
+  render();
+}
+
+// Slider fill
+function updateSlider(el) {
+  const min=parseFloat(el.min), max=parseFloat(el.max), val=parseFloat(el.value);
+  const pct=((val-min)/(max-min))*100;
+  el.style.background=`linear-gradient(90deg,var(--primary) ${pct}%,rgba(47,217,255,.15) ${pct}%)`;
+}
+
+/* ══════ EXPORT ══════ */
+async function loadH2C() {
+  if(window.html2canvas) return;
+  await new Promise((res,rej)=>{
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+    s.onload=res; s.onerror=rej; document.head.appendChild(s);
+  });
+}
+
+async function renderBlob(dpr) {
+  await loadH2C();
+  if(document.fonts?.ready) await document.fonts.ready;
+  const cover=document.getElementById('cover');
+  const origT=cover.style.transform;
+  cover.style.transform='none';
+  await new Promise(r=>setTimeout(r,100));
+  const logoImg = cover.querySelector('#cover-logo img');
+  if (logoImg?.decode) {
+    try { await logoImg.decode(); } catch (_) {}
+  }
+  const canvas=await window.html2canvas(cover,{
+    backgroundColor:null,scale:dpr,useCORS:true,logging:false,
+    width:S.W,height:S.H,foreignObjectRendering:false
+  });
+  cover.style.transform=origT;
+  return new Promise((res,rej)=>canvas.toBlob(b=>b?res(b):rej(new Error('blob failed')),'image/png'));
+}
+
+async function exportPNG() {
+  const btn=document.querySelector('.btn-primary');
+  btn.disabled=true; btn.textContent='Exporting…';
+  try {
+    const dpr=parseFloat(document.getElementById('export-dpr').value)||2;
+    const blob=await renderBlob(dpr);
+    const a=document.createElement('a');
+    const ts=new Date().toISOString().slice(0,19).replace(/[:T]/g,'-');
+    a.href=URL.createObjectURL(blob);
+    a.download=`clovis-blog-cover-${S.W}x${S.H}-${ts}.png`;
+    document.body.appendChild(a);a.click();a.remove();
+    URL.revokeObjectURL(a.href);
+  } catch(e){alert('Export failed: '+e.message);}
+  finally{btn.disabled=false;btn.textContent='⬇ Export PNG';}
+}
+
+async function copyPNG() {
+  const btn=document.querySelector('.btn-ghost');
+  btn.disabled=true; btn.textContent='Copying…';
+  try {
+    const dpr=parseFloat(document.getElementById('export-dpr').value)||2;
+    const blob=await renderBlob(dpr);
+    await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
+    btn.textContent='✓ Copied!';
+    setTimeout(()=>{btn.textContent='⎘ Copy PNG';btn.disabled=false;},2000);
+  } catch(e){btn.disabled=false;btn.textContent='⎘ Copy PNG';alert('Copy failed: '+e.message);}
+}
+
+/* ══════ INIT ══════ */
+(async function init() {
+  document.getElementById('title-input').value = S.title;
+  ['fs-slider','lh-slider','vp-slider'].forEach((id) => updateSlider(document.getElementById(id)));
+  try {
+    await loadBackgroundSvgs();
+  } catch (e) {
+    console.error(e);
+    document.getElementById('preview-label').textContent =
+      '無法載入背景圖（請用本機伺服器開啟，勿用 file://）';
+  }
+  render();
+  window.addEventListener('resize', applyScale);
+})();
+</script>
+</body>
+</html>
