@@ -103,22 +103,67 @@
     .export-modal img{max-width:100%;border-radius:8px;margin-bottom:16px;border:1px solid rgba(255,255,255,.1);}
     .export-modal .btn{margin:4px;min-width:120px;}
 
+    /* Accordion (mobile only, styled for all) */
+    .sec-title{cursor:default;}
+    .sec-body{display:block;}
+
+    /* Sticky bottom bar (hidden on desktop) */
+    .mobile-bottom-bar{display:none;}
+
     /* ── RWD ── */
     @media(max-width:860px){
-      .toolbar{padding:8px 12px;gap:8px;}
+      /* Prevent double-tap zoom */
+      *{touch-action:manipulation;}
+
+      .toolbar{padding:10px 14px;gap:10px;}
       .tool-sep.desktop-only,.tool-label.desktop-only,.ctrl.desktop-only{display:none;}
+      .tool-logo{font-size:14px;}
+      /* Hide top-bar export buttons on mobile — they live in bottom bar */
+      .toolbar .btn-ghost,.toolbar .btn-primary{display:none;}
+
       .main{flex-direction:column;}
-      .editor{width:100%;min-width:0;max-height:none;border-right:none;border-bottom:1px solid rgba(47,217,255,.1);padding:14px 16px;order:1;}
-      .preview{order:2;padding:16px 12px;}
-      .preview-label{margin-bottom:10px;}
-      #scale-wrap{max-width:100%;overflow-x:auto;}
+      /* Preview FIRST on mobile */
+      .preview{order:1;padding:16px 12px;}
+      .editor{order:2;width:100%;min-width:0;max-height:none;border-right:none;border-top:1px solid rgba(47,217,255,.1);border-bottom:none;padding:0;padding-bottom:76px;}
+      .preview-label{margin-bottom:10px;font-size:11px;}
+      #scale-wrap{max-width:100%;}
+
+      /* Enlarged touch targets */
+      .sec{margin-bottom:0;}
+      .sec-title{font-size:14px;margin-bottom:0;padding:16px 20px;border-bottom:1px solid rgba(47,217,255,.08);cursor:pointer;display:flex;justify-content:space-between;align-items:center;-webkit-tap-highlight-color:transparent;}
+      .sec-title::after{content:'▾';font-size:12px;color:rgba(47,217,255,.4);transition:transform .2s;}
+      .sec.collapsed .sec-title::after{transform:rotate(-90deg);}
+      .sec-body{padding:14px 20px 20px;}
+      .sec.collapsed .sec-body{display:none;}
+      .field{margin-bottom:14px;}
+      .field-label{font-size:13px;margin-bottom:6px;}
+      textarea,input[type=text]{font-size:16px;padding:10px 12px;border-radius:8px;}
+      .size-btn{font-size:13px;padding:12px 10px;}
+      .size-btn span{font-size:11px!important;}
+      .color-dot{width:36px;height:36px;}
+      input[type=color]{width:36px;height:36px;}
+      .color-row{gap:12px;}
+      .tog{font-size:15px;padding:12px 6px;border-radius:8px;}
+      .preset-btn{font-size:13px;padding:10px 4px;border-radius:7px;}
+      .default-btn{font-size:12px;padding:8px 14px;border-radius:6px;}
+      input[type=range]{height:6px;margin-top:8px;}
+      input[type=range]::-webkit-slider-thumb{width:24px;height:24px;}
+      .vert-row span{font-size:14px!important;}
+      .btn-row{gap:8px;}
+      .preset-row{gap:6px;}
+
+      .export-modal p{font-size:15px;}
+
+      /* Sticky bottom action bar */
+      .mobile-bottom-bar{display:flex;position:fixed;bottom:0;left:0;right:0;z-index:200;background:#0d1820;border-top:1px solid rgba(47,217,255,.15);padding:12px 16px;gap:10px;padding-bottom:max(12px,env(safe-area-inset-bottom));}
+      .mobile-bottom-bar .btn{flex:1;padding:14px 10px;font-size:15px;font-weight:600;border-radius:10px;text-align:center;}
     }
     @media(max-width:480px){
-      .toolbar{padding:6px 10px;gap:6px;}
-      .tool-logo{font-size:10px;letter-spacing:.12em;}
-      .btn{padding:5px 10px;font-size:12px;}
+      .toolbar{padding:8px 12px;gap:8px;}
+      .tool-logo{font-size:12px;letter-spacing:.12em;}
       .size-btns{flex-direction:column;}
-      .editor{padding:12px;}
+      .sec-body{padding:12px 16px 16px;}
+      .sec-title{padding:14px 16px;font-size:13px;}
     }
   </style>
 </head>
@@ -151,8 +196,8 @@
     <option value="3">3×</option>
   </select>
   <div class="spacer"></div>
-  <button class="btn btn-ghost" onclick="copyPNG()">⎘ Copy PNG</button>
-  <button class="btn btn-primary" onclick="exportPNG()">⬇ Export PNG</button>
+  <button class="btn btn-ghost" data-action="copy" onclick="copyPNG()">⎘ Copy PNG</button>
+  <button class="btn btn-primary" data-action="export" onclick="exportPNG()">⬇ Export PNG</button>
 </div>
 
 <div class="main">
@@ -160,7 +205,8 @@
 
   <!-- SIZE -->
   <div class="sec">
-    <div class="sec-title">Canvas Size</div>
+    <div class="sec-title" onclick="toggleSec(this)">Canvas Size</div>
+    <div class="sec-body">
     <div class="size-btns">
       <div class="size-btn active" onclick="setSize(1200,675,this)">
         1200×675<br><span style="opacity:.55;font-size:9px">Website Blog</span>
@@ -169,11 +215,13 @@
         1200×480<br><span style="opacity:.55;font-size:9px">Twitter / Social</span>
       </div>
     </div>
+    </div>
   </div>
 
   <!-- BACKGROUND TINT -->
   <div class="sec">
-    <div class="sec-title">Background Tint</div>
+    <div class="sec-title" onclick="toggleSec(this)">Background Tint</div>
+    <div class="sec-body">
     <div class="field">
       <div class="color-row" id="tint-swatches">
         <div class="color-dot active" style="background:#01212e;outline:1px dashed rgba(255,255,255,.3);outline-offset:2px;" onclick="setTint(null,this)" title="No tint (original)"></div>
@@ -183,11 +231,13 @@
         <div class="color-dot" style="background:#011a22;" onclick="setTint({c:'#011a22',o:.28},this)" title="Dark Teal"></div>
       </div>
     </div>
+    </div>
   </div>
 
   <!-- TITLE TEXT -->
   <div class="sec">
-    <div class="sec-title">Title Text</div>
+    <div class="sec-title" onclick="toggleSec(this)">Title Text</div>
+    <div class="sec-body">
     <div class="field">
       <div class="field-label">Title</div>
       <textarea id="title-input" rows="4" placeholder="Enter blog post title…" oninput="S.title=this.value;render()"></textarea>
@@ -253,14 +303,17 @@
         <button class="default-btn" onclick="resetVertPos()">Default</button>
       </div>
     </div>
+    </div>
   </div>
 
   <!-- LOGO -->
   <div class="sec">
-    <div class="sec-title">Logo</div>
+    <div class="sec-title" onclick="toggleSec(this)">Logo</div>
+    <div class="sec-body">
     <div class="btn-row">
       <div class="tog active" id="logo-show" onclick="setLogo(true,this)">✓ Show</div>
       <div class="tog" id="logo-hide" onclick="setLogo(false,this)">✕ Hide</div>
+    </div>
     </div>
   </div>
 
@@ -278,6 +331,12 @@
     </div>
   </div>
 </div>
+</div>
+
+<!-- Mobile sticky bottom bar -->
+<div class="mobile-bottom-bar">
+  <button class="btn btn-ghost" data-action="copy" onclick="copyPNG()">⎘ Copy</button>
+  <button class="btn btn-primary" data-action="export" onclick="exportPNG()">⬇ Export PNG</button>
 </div>
 
 <script>
@@ -609,9 +668,15 @@ function showExportModal(blob) {
   document.body.appendChild(overlay);
 }
 
+function setExportBtns(disabled, text) {
+  document.querySelectorAll('[data-action="export"]').forEach(b => { b.disabled = disabled; b.textContent = text; });
+}
+function setCopyBtns(disabled, text) {
+  document.querySelectorAll('[data-action="copy"]').forEach(b => { b.disabled = disabled; b.textContent = text; });
+}
+
 async function exportPNG() {
-  const btn=document.querySelector('.btn-primary');
-  btn.disabled=true; btn.textContent='Exporting…';
+  setExportBtns(true, 'Exporting…');
   try {
     const dpr=parseFloat(document.getElementById('export-dpr').value)||2;
     const blob=await renderBlob(dpr);
@@ -626,25 +691,41 @@ async function exportPNG() {
       URL.revokeObjectURL(a.href);
     }
   } catch(e){alert('Export failed: '+e.message);}
-  finally{btn.disabled=false;btn.textContent='⬇ Export PNG';}
+  finally{setExportBtns(false,'⬇ Export PNG');}
 }
 
 async function copyPNG() {
-  const btn=document.querySelector('.btn-ghost');
-  btn.disabled=true; btn.textContent='Copying…';
+  setCopyBtns(true, 'Copying…');
   try {
     const dpr=parseFloat(document.getElementById('export-dpr').value)||2;
     const blob=await renderBlob(dpr);
     await navigator.clipboard.write([new ClipboardItem({'image/png':blob})]);
-    btn.textContent='✓ Copied!';
-    setTimeout(()=>{btn.textContent='⎘ Copy PNG';btn.disabled=false;},2000);
-  } catch(e){btn.disabled=false;btn.textContent='⎘ Copy PNG';alert('Copy failed: '+e.message);}
+    setCopyBtns(false, '✓ Copied!');
+    setTimeout(()=>setCopyBtns(false,'⎘ Copy'),2000);
+  } catch(e){setCopyBtns(false,'⎘ Copy');alert('Copy failed: '+e.message);}
+}
+
+/* ══════ ACCORDION ══════ */
+function toggleSec(titleEl) {
+  // Only toggle on mobile
+  if (window.innerWidth > 860) return;
+  titleEl.closest('.sec').classList.toggle('collapsed');
+}
+
+function initMobileAccordion() {
+  if (window.innerWidth > 860) return;
+  // Collapse less-used sections by default; keep Title Text open
+  document.querySelectorAll('.editor .sec').forEach((sec, i) => {
+    // i=0 Canvas Size, i=1 Background Tint, i=2 Title Text, i=3 Logo
+    if (i !== 2) sec.classList.add('collapsed');
+  });
 }
 
 /* ══════ INIT ══════ */
 (async function init() {
   document.getElementById('title-input').value = S.title;
   ['fs-slider','lh-slider','vp-slider'].forEach((id) => updateSlider(document.getElementById(id)));
+  initMobileAccordion();
   try {
     await loadBackgroundSvgs();
   } catch (e) {
