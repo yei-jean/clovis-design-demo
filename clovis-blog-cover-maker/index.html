@@ -105,20 +105,38 @@
 
     /* ── RWD ── */
     @media(max-width:860px){
-      .toolbar{padding:8px 12px;gap:8px;}
+      .toolbar{padding:10px 14px;gap:10px;}
       .tool-sep.desktop-only,.tool-label.desktop-only,.ctrl.desktop-only{display:none;}
+      .tool-logo{font-size:14px;}
+      .btn{padding:10px 18px;font-size:15px;}
       .main{flex-direction:column;}
-      .editor{width:100%;min-width:0;max-height:none;border-right:none;border-bottom:1px solid rgba(47,217,255,.1);padding:14px 16px;order:1;}
+      .editor{width:100%;min-width:0;max-height:none;border-right:none;border-bottom:1px solid rgba(47,217,255,.1);padding:18px 20px;order:1;}
+      .sec-title{font-size:12px;margin-bottom:12px;padding-bottom:8px;}
+      .sec{margin-bottom:24px;}
+      .field{margin-bottom:14px;}
+      .field-label{font-size:13px;margin-bottom:6px;}
+      textarea,input[type=text]{font-size:16px;padding:10px 12px;border-radius:8px;}
+      .size-btn{font-size:13px;padding:10px;}
+      .size-btn span{font-size:11px!important;}
+      .color-dot{width:32px;height:32px;}
+      input[type=color]{width:32px;height:32px;}
+      .color-row{gap:10px;}
+      .tog{font-size:15px;padding:10px 6px;border-radius:7px;}
+      .preset-btn{font-size:13px;padding:8px 4px;border-radius:7px;}
+      .default-btn{font-size:12px;padding:6px 12px;border-radius:6px;}
+      input[type=range]{height:5px;margin-top:6px;}
+      input[type=range]::-webkit-slider-thumb{width:20px;height:20px;}
       .preview{order:2;padding:16px 12px;}
-      .preview-label{margin-bottom:10px;}
+      .preview-label{margin-bottom:10px;font-size:11px;}
       #scale-wrap{max-width:100%;overflow-x:auto;}
+      .export-modal p{font-size:15px;}
     }
     @media(max-width:480px){
-      .toolbar{padding:6px 10px;gap:6px;}
-      .tool-logo{font-size:10px;letter-spacing:.12em;}
-      .btn{padding:5px 10px;font-size:12px;}
+      .toolbar{padding:8px 12px;gap:8px;}
+      .tool-logo{font-size:12px;letter-spacing:.12em;}
+      .btn{padding:9px 14px;font-size:14px;}
       .size-btns{flex-direction:column;}
-      .editor{padding:12px;}
+      .editor{padding:16px;}
     }
   </style>
 </head>
