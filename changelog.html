@@ -99,7 +99,17 @@
       <div class="section">
         <div class="section-title">ADDED</div>
         <ul class="section-list">
-          <li>Index page at project root with link to Graphic Maker</li>
+          <li>
+            <strong>Blog Cover Maker</strong> (<code>clovis-blog-cover-maker/</code>): 1200×675
+            (blog) and 1200×480 (social) covers; title, tint, typography, logo toggle; copy or
+            export PNG (html2canvas, 1×–3× DPR)
+          </li>
+          <li>
+            Shared assets under <code>image/</code>: <code>clovis-Logo.svg</code>,
+            <code>BlogCover-Background.svg</code> (loaded via <code>fetch</code>; use a local HTTP
+            server, not <code>file://</code>)
+          </li>
+          <li>Index page at project root with links to Graphic Maker and Blog Cover Maker</li>
           <li>Export scale selector (1x, 1.5x, 2x, 3x) for PNG resolution</li>
           <li>Collapsible editor panel with icon toggle</li>
           <li>Title layout option: same line (inline) or new line (block)</li>
@@ -113,6 +123,10 @@
         <div class="section-title">CHANGED</div>
         <ul class="section-list">
           <li>Rate Data graphic: column spacing adjusted for even distribution</li>
+          <li>
+            Blog Cover Maker: logo and title share the same horizontal inset (60px at 1200px
+            width); logo top offset 64.62px at 675px canvas height (scaled for other heights)
+          </li>
         </ul>
       </div>
 
@@ -122,6 +136,11 @@
           <li>Export PNG gradient text displacement (template-specific vertical nudge)</li>
           <li>Export PNG gradient text wrap/layout when title is long</li>
           <li>Export PNG fallback (html2canvas + SVG foreignObject) for browser compatibility</li>
+          <li>Blog Cover Maker: text color swatch active state (presets vs custom color)</li>
+          <li>
+            Blog Cover Maker: PNG export waits for logo image <code>decode()</code> so the mark
+            is not missing on first export
+          </li>
         </ul>
       </div>
 
